@@ -232,7 +232,7 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 .tPortrait img{width:100%;display:block}
 @keyframes tfloat{50%{transform:translateY(-10px)}}
 .tRight{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;padding:0 2vw}
-.tLogo{width:88%;max-width:600px;padding:0 4%;box-sizing:content-box;filter:drop-shadow(0 10px 0 #0b1a5a) drop-shadow(0 20px 40px rgba(0,0,0,.5));animation:tpop 1s cubic-bezier(.2,1.5,.4,1)}
+.tLogo{width:100%;max-width:680px;height:auto;display:block;filter:drop-shadow(0 10px 0 #0b1a5a) drop-shadow(0 20px 40px rgba(0,0,0,.5));animation:tpop 1s cubic-bezier(.2,1.5,.4,1)}
 @keyframes tpop{from{transform:scale(.3) rotate(-8deg);opacity:0}}
 .tSub{font-family:var(--title);font-size:clamp(18px,2.4vw,30px);color:#fff;text-shadow:3px 3px 0 #0b1a5a;letter-spacing:.04em}
 #btnStart{font-size:clamp(20px,2.6vw,32px);animation:pulse 1.4s infinite;transform-origin:center}
@@ -1008,11 +1008,13 @@ function drawPablo(c,face,x,y,h,frame){ const view=face==='up'?'up':face==='down
   c.save(); c.imageSmoothingEnabled=true;
   // sombra en el suelo
   c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(x,y-h*.01,w*.34,h*.035,0,0,7); c.fill();
-  if(frame){ // piernas
-    c.drawImage(im,0,legY,IW/2,IH-legY, x-w/2+(frame===1?fw*dir:0),legTopPx+la,w/2,h*(IH-legY)/IH);
-    c.drawImage(im,IW/2,legY,IW/2,IH-legY, x+(frame===2?fw*dir:0),legTopPx+ra,w/2,h*(IH-legY)/IH);
-    // cuerpo con balanceo
-    c.translate(x,legTopPx+bob); c.rotate(frame===1?-.03:.03); c.drawImage(im,0,0,IW,legY+2, -w/2,-(legTopPx-top),w,h*(legY+2)/IH);
+  if(frame){ // el sprite entero queda fijo y encima se AÑADE la copia de la pierna que avanza (sin hueco entre piernas)
+    c.drawImage(im,x-w/2,top,w,h);
+    const legW=IW/2, legH=IH-legY; const dxL=frame===1?fw*dir:0, dxR=frame===2?fw*dir:0;
+    if(frame===1) c.drawImage(im,0,legY,legW,legH, x-w/2+dxL,legTopPx+la,w/2,h*legH/IH);
+    if(frame===2) c.drawImage(im,IW/2,legY,legW,legH, x+dxR,legTopPx+ra,w/2,h*legH/IH);
+    // ligero balanceo del cuerpo (solo la parte superior, encima)
+    c.translate(x,legTopPx+bob); c.rotate(frame===1?-.025:.025); c.drawImage(im,0,0,IW,legY-Math.round(IH*.02), -w/2,-(legTopPx-top),w,h*(legY-Math.round(IH*.02))/IH);
   } else { c.drawImage(im,x-w/2,top,w,h); }
   c.restore(); }
 /* joystick virtual: onDir(dx,dy) con -1/0/1 (eje dominante), onDir(0,0) al soltar */
