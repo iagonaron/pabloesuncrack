@@ -287,12 +287,12 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 .tapIn{display:flex;flex-direction:column;align-items:center;gap:26px;animation:fadein 1s ease-out}
 .tapIn img{width:min(60vw,520px);filter:drop-shadow(0 0 30px rgba(255,203,5,.35))}
 .tapTxt{color:#fff;font-size:clamp(14px,2.2vw,22px);text-shadow:3px 3px 0 #000;animation:pulse2 1.3s infinite}
-#endScreen{position:fixed;inset:0;z-index:210;background:#0b1a3a url(assets/end_bg.jpg) center/cover;display:flex;align-items:center;justify-content:center;overflow:hidden;animation:fadein 1.2s ease-out}
+#endScreen{position:fixed;inset:0;z-index:210;background:#0b1a3a url(assets/end_bg.jpg) center/cover;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;animation:fadein 1.2s ease-out}
 #endScreen::before{content:"";position:absolute;inset:-40px;background:url(assets/end_bg.jpg) center/cover;filter:blur(18px) brightness(.5)}
 #endScreen.hidden{display:none}
-.eBtn{position:absolute;left:50%;bottom:1%;font-size:14px;padding:12px 26px;transform:translateX(-50%);animation:pulse 1.4s infinite 2.5s;opacity:0;animation-fill-mode:forwards}
+.eBtn{position:absolute;left:auto;right:2.5%;bottom:2.5%;font-size:12px;padding:10px 18px;transform:none;opacity:0;white-space:nowrap}
 @keyframes ebtn{to{opacity:1}}
-.eBtn{animation:ebtn .6s ease-out 2.4s forwards,pulse 1.4s infinite 3s}
+.eBtn{animation:ebtn .6s ease-out 2.4s forwards,pulse2 1.4s infinite 3s}
 #titleSea{position:absolute;inset:0;width:100%;height:100%}
 .tWrap{position:relative;display:flex;align-items:center;gap:6vw;padding:4vh 6vw;width:100%;max-width:1400px}
 .tPortrait{flex:0 0 36%;border:8px solid #ffcb05;border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(255,203,5,.5),12px 12px 0 #0b1a5a;background:#1c2a3a;animation:tfloat 4s ease-in-out infinite}
@@ -525,7 +525,7 @@ main{position:relative}
     <button class="tGear" id="tGear" aria-label="Ajustes" style="display:none"></button>
   </div>
 </div>
-<div id="endScreen" class="hidden"><div class="tArt eArt"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn big eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
+<div id="endScreen" class="hidden"><div class="tArt eArt"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
 <div id="react" class="hidden"><img id="reactImg" alt=""></div>
 <div id="flash"></div>
 <div class="ov hidden" id="templeOv"><div class="templeCard"><img src="assets/gym/fachada_dibujo.png" alt=""><div class="pf templeT">¡TEMPLO DEL DIBUJO DESBLOQUEADO!</div><div class="templeS">Pablo tiene las 4 insignias de hoy. El portal del pueblo se ha encendido: ¡súbete y te llevará al Templo del Dibujo!</div><button class="pixbtn big" id="templeOk">¡VAMOS!</button></div></div>
@@ -1074,14 +1074,21 @@ MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4
     const cursor=$('#entCursor'); const paper=$('#entStaff'); if(positions[0]) cursor.style.left=(positions[0].x-22)+'px'; cursor.style.display='block'; singing=true; $('#entMsg').textContent='¡CANTA! 🎤';
     const CUR='#1e88e5'; const mark=i=>{ const el=positions[i]&&positions[i].el; if(el){ el.querySelectorAll('path,ellipse,rect').forEach(p=>{ p.setAttribute('fill',CUR); p.setAttribute('stroke',CUR); }); } }; mark(0);
     const needle=$('#entNeedle i'), sung=$('#entSung');
-    let idx=0, tNote=tStart, okFrames=0; const loop=()=>{ if(!singing)return; const now=c.currentTime; if(now<tStart){ raf=requestAnimationFrame(loop); return; } if(now>=tNote+bs){ idx++; tNote+=bs; okFrames=0; mark(idx); } calibrateMicGain();
-      if(idx>=0&&idx<4){ const ci=idx; const px=positions[idx]?positions[idx].x-paper.getBoundingClientRect().left+paper.parentElement.getBoundingClientRect().left:0; const pr=paper.getBoundingClientRect(); const rel=positions[idx]?positions[idx].x:0; cursor.style.left=(rel-22)+'px';
+    // cada nota tiene 2 s: si en ese tiempo no se mantiene afinada (10 frames seguidos dentro de ±50 cents) cuenta como mal; casi (±100) vale medio punto
+    const LIMIT=Math.min(2.0,bs); let idx=0, tNote=tStart, okFrames=0, nearFrames=0; const settle=(R,val)=>{ R.best=val; R.done=true; };
+    const loop=()=>{ if(!singing)return; const now=c.currentTime; if(now<tStart){ raf=requestAnimationFrame(loop); return; } calibrateMicGain();
+      if(idx>=0&&idx<4){ const ci=idx; const rel=positions[idx]?positions[idx].x:0; cursor.style.left=(rel-22)+'px';
         const fr=micGetFrame(); const R=results[idx]; R.frames++;
-        if(fr.freq>0){ R.voiced++; const ev=evalPitchCents(fr.freq,DEG_MIDI[notes[idx]]); if(R.best==null||ev.centsAbs<R.best)R.best=ev.centsAbs; R.dirSum+=ev.cents; smooth+=(Math.max(-50,Math.min(50,ev.cents))-smooth)*.18; needle.style.left=(50+smooth)+'%'; okFrames=ev.centsAbs<=PCFG.centsPerfect?okFrames+1:0; if(okFrames>=10&&now>tNote+.35){ blip(1200,.05,'square',.06); idx++; tNote=now; okFrames=0; mark(idx); } sung.textContent=freqToName(fr.freq); sung.style.color=ev.centsAbs<=50?'#7cff7a':ev.centsAbs<=100?'#ffb340':'#ff5b6a';
-          const el=positions[ci]&&positions[ci].el; if(el){ const cc=colorFor(R); el.querySelectorAll('path,ellipse,rect').forEach(p=>{ p.setAttribute('fill',cc); p.setAttribute('stroke',cc); }); } }
-        else { sung.textContent='…'; sung.style.color='#fff'; } }
+        if(fr.freq>0){ R.voiced++; const ev=evalPitchCents(fr.freq,DEG_MIDI[notes[idx]]); R.dirSum+=ev.cents; smooth+=(Math.max(-50,Math.min(50,ev.cents))-smooth)*.18; needle.style.left=(50+smooth)+'%';
+          okFrames=ev.centsAbs<=PCFG.centsPerfect?okFrames+1:0; nearFrames=ev.centsAbs<=PCFG.centsNear?nearFrames+1:0;
+          sung.textContent=freqToName(fr.freq); sung.style.color=ev.centsAbs<=50?'#7cff7a':ev.centsAbs<=100?'#ffb340':'#ff5b6a';
+          if(okFrames>=10&&now>tNote+.25){ settle(R,Math.min(ev.centsAbs,PCFG.centsPerfect)); blip(1200,.05,'square',.06); idx++; tNote=now; okFrames=0; nearFrames=0; mark(idx); } }
+        else { sung.textContent='…'; sung.style.color='#fff'; }
+        if(!R.done&&now>=tNote+LIMIT){ // se acabó el tiempo de esta nota
+          if(nearFrames>=8) settle(R,PCFG.centsNear); else settle(R,R.voiced>0?PCFG.centsNear+60:null); tone(now,40,.15,.12,'sawtooth'); idx++; tNote=now; okFrames=0; nearFrames=0; mark(idx); }
+        const el=positions[ci]&&positions[ci].el; if(el){ const cc=colorFor(R); el.querySelectorAll('path,ellipse,rect').forEach(p=>{ p.setAttribute('fill',cc); p.setAttribute('stroke',cc); }); } }
       if(idx>=4){ singing=false; cursor.style.display='none'; finishRound(); return; } raf=requestAnimationFrame(loop); }; raf=requestAnimationFrame(loop); }
-  function finishRound(){ results.forEach(R=>{ if(R.voiced<Math.max(2,R.frames*.2)) R.best=null; }); render();
+  function finishRound(){ results.forEach(R=>{ if(!R.done&&R.voiced<Math.max(2,R.frames*.2)) R.best=null; }); render();
     const pts=results.map(R=>R.best==null?0:R.best<=PCFG.centsPerfect?1:R.best<=PCFG.centsNear?.5:0); const sc=pts.reduce((a,b)=>a+b,0)/4; roundScores.push(sc);
     const voiced=results.filter(R=>R.best!=null).length;
     if(voiced===0&&silent<2){ silent++; roundScores.pop(); $('#entMsg').textContent='No te he oído 🙉 ¡Canta más fuerte! Vamos a repetir'; retry=true; T(next,1800); return; }
@@ -1225,7 +1232,7 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
   function playTrack(name){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; if(old){ old.__kill=false; fadeTo(old,0,1200,()=>{ old.pause(); old.src=''; }); }
     const el=new Audio(TRACKS[name]); const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
-    const seek=()=>{ try{ if(!one&&name!=='final'&&name!=='base'&&name!=='opening'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
+    const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
     // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
     el.play().catch(()=>{}); fadeTo(el,VOL,one?300:1500); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
@@ -1417,7 +1424,7 @@ MODULES.mapa=(()=>{
     c.restore();
     // viñeta
     const v=c.createRadialGradient(W/2,H*.45,H*.35,W/2,H*.45,H*.95); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,.55)'); c.fillStyle=v; c.fillRect(0,0,W,H); }
-  function onArrive(){ const s=SC[screen]; if(s.interior){ const [ddx,ddy]=P(...s.door); if(Math.hypot(pos.x-ddx,pos.y-ddy)>16) return; /* el jefe solo aparece al llegar a las escaleras */ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('asustado',2200,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); setTimeout(()=>react('decidido',0),2300); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
+  function onArrive(){ const s=SC[screen]; if(s.interior){ const [ddx,ddy]=P(...s.door); if(pos.y>ddy+16) return; /* el jefe solo aparece al llegar a las escaleras */ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('asustado',2200,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); setTimeout(()=>react('decidido',0),2300); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
     if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<40){ face='up'; const ph=screen==='dibujo'?'dibujo':phaseOfBiome(screen); if(ph){ atGym=ph; showPrompt(ph); } } } }
   function snapWalk(s,x,y){ if(walkable(s,x,y)) return [x,y]; for(let r=6;r<=90;r+=6){ for(let a=0;a<12;a++){ const t=a/12*Math.PI*2; const nx=x+Math.cos(t)*r, ny=y+Math.sin(t)*r; if(walkable(s,nx,ny)) return [nx,ny]; } } return [x,y]; }
   let zoneArmed=true; // tras un cambio de pantalla, las zonas de salida no cuentan hasta que Pablo sale de ellas (evita el ping-pong)
@@ -1426,7 +1433,7 @@ MODULES.mapa=(()=>{
     if(screen==='pueblo'){ if(zoneArmed) for(const d of DIRS){ const [ex,ey]=P(...s.exits[d]); if(Math.hypot(pos.x-ex,pos.y-ey)<70){ const ph=EXIT[d]; const b=TODAY_BIOMES[ph]; if(!b) return; const [ex2,ey2]=P(...SC[b].entry); startTrans(d,b,snapWalk(SC[b],ex2,ey2-70),()=>{ if(autoGoal===ph){ const [dx,dy]=P(...SC[b].door); route=bfs(SC[b],[pos.x,pos.y],[dx,dy]); } }); return; } }
       // portal encendido: teletransporte al templo
       const [px,py]=P(...s.pad); if((dibujoUnlocked()||forceTemple)&&Math.hypot(pos.x-px,pos.y-py)<30) teleport(); }
-    else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<14&&bossState&&!bossState.shown) onArrive(); } }
+    else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(pos.y<=dy+14&&bossState&&!bossState.shown) onArrive(); } }
     else { if(zoneArmed&&inExitZone()){ const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===screen)||'S'; const back={N:'S',S:'N',E:'W',W:'E'}[d]; const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,110],S:[0,-110],E:[-110,0],W:[110,0]}[d]; startTrans(back,'pueblo',snapWalk(SC.pueblo,bx+inward[0],by+inward[1])); return; }
       doorCheck(); } }
   function doorCheck(){ const s=SC[screen]; if(!s||s.interior||!s.door||busy) return; const [dx,dy]=P(...s.door); const d=Math.hypot(pos.x-dx,pos.y-dy); if(d<44&&!atGym) onArrive(); else if(atGym&&atGym!=='__boss'&&d>80) hidePrompt(); }
