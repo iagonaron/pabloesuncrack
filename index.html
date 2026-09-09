@@ -734,7 +734,7 @@ function G(){ const p=loadJSON('pec_prog',{}); const base={date:todayKey(),stars
 function saveG(g){ saveJSON('pec_prog',g); }
 function pctStars(p){ return p>=90?3:p>=60?2:1; }
 function setStars(phase,n,pct){ n=Math.max(1,n|0); const g=G(); g.stars[phase]=Math.max(g.stars[phase]||0,n); if(pct!=null){ g.pct=g.pct||{}; g.pct[phase]=Math.max(g.pct[phase]||0,pct); } if(!g.visited.includes(phase))g.visited.push(phase);
-  if(n>=2&&!g.medals.includes(phase)){ g.medals.push(phase); g.newMedal=phase; }
+  if(!g.medals.includes(phase)){ g.medals.push(phase); g.newMedal=phase; } // toda prueba completada da insignia, sea cual sea la nota
   if(phase!=='dibujo'&&!g.encountered.includes(phase)) g.pending={phase,stars:n}; saveG(g); }
 const GYMS=['teoria','ritmo','audicion','entonacion'];
 function dibujoUnlocked(){ const g=G(); return GYMS.every(p=>g.medals.includes(p)); }
@@ -871,7 +871,7 @@ function genDegrees(n,maxDeg,startDeg){ const out=[startDeg==null?0:startDeg]; w
    ============================================================ */
 /* Aviso de cambio a clave de Do en 3ª (viola): tarjeta con botón ENTENDIDO; onOk se llama al cerrarla */
 function clefWarnCard(onOk){ const ov=document.createElement('div'); ov.className='ov'; ov.id='clefOv'; ov.innerHTML=`<div class="templeCard" style="width:min(560px,92vw)"><div class="pf" style="font-size:clamp(18px,3vw,30px);color:#ffcb05;text-shadow:3px 3px 0 #000">¡CUIDADO!</div><div class="paper" id="clefDemo" style="width:min(420px,80vw);padding:6px 10px"></div><div class="templeT" style="font-size:clamp(14px,2.2vw,22px)">Ahora en CLAVE DE DO EN 3ª</div><div class="templeS">Es la clave de la viola: el Do está en la línea del medio.</div><button class="pixbtn big" id="clefOk">ENTENDIDO</button></div>`; document.body.appendChild(ov);
-  try{ drawSystem(ov.querySelector('#clefDemo'),[{notes:[{deg:0,dur:'w',text:'Do',textColor:'#e53935',color:'#e53935'}]}],{clef:'alto',height:110,scale:1.15,top:12,showTime:false,end:true,annSize:22,noBeam:true}); }catch(e){}
+  try{ drawSystem(ov.querySelector('#clefDemo'),[{notes:[{deg:0,dur:'w',text:'Do',textColor:'#e53935',color:'#e53935'}]}],{clef:'alto',height:150,scale:1.0,top:14,showTime:false,end:true,annSize:20,noBeam:true}); }catch(e){}
   blip(660,.12,'square',.1); setTimeout(()=>blip(880,.12,'square',.1),140); ov.querySelector('#clefOk').onclick=()=>{ ov.remove(); if(onOk) onOk(); }; }
 MODULES.teoria=(()=>{ const root=$('#teoria'); let mel=[],cur=0,errs=0,streak=0,sysDivs=[],done=false;
   function gen(){ const bars=CFG.teoBars|0||8; const notes=[]; let deg=0;
@@ -1240,15 +1240,15 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
   const VOL=.16; let aCur=null,aName=null,fades=[]; // −10 dB respecto a antes
   function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
-  function playTrack(name){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; if(old){ old.__kill=false; fadeTo(old,0,1200,()=>{ old.pause(); old.src=''; }); }
+  function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__kill=false; fadeTo(old,0,OUT,()=>{ old.pause(); old.src=''; }); }
     const el=new Audio(TRACKS[name]); const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
     const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
     // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
-    el.play().catch(()=>{}); fadeTo(el,VOL,one?300:1500); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
+    el.play().catch(()=>{}); fadeTo(el,VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
-  function stopTrack(){ if(aCur){ const old=aCur; fadeTo(old,0,700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
-  function play(name){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr); return; } stopTrack(); playChip(name); }
-  function stop(){ stopChip(); stopTrack(); }
+  function stopTrack(ms){ if(aCur){ const old=aCur; fadeTo(old,0,ms||700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
+  function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia→pueblo)
+  function stop(slow){ stopChip(); stopTrack(slow?2600:700); } // slow=true: desvanecimiento suave (p. ej. la Pokédex al empezar la prueba)
   return {play,stop,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
 $('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo') Music.play('dibujo'); else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
 function drawPix(ctx,rows,x,y,px,flip,legs){ const side=rows===SPR.side; rows.forEach((row,j)=>{ let r=row; if(legs&&j>=31){ r=(side?LEGS_SIDE:LEGS)[legs][j-31]||row; } for(let i=0;i<r.length;i++){ const ch=r[i]; if(ch==='.')continue; ctx.fillStyle=PAL[ch]||'#000'; const xi=flip?(r.length-1-i):i; ctx.fillRect(Math.round(x+xi*px),Math.round(y+j*px),Math.ceil(px),Math.ceil(px)); } }); }
@@ -1388,8 +1388,8 @@ MODULES.mapa=(()=>{
     c.restore(); }
   // ---- lógica ----
   function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
-  function musicFor(){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen); }
-  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; { const el=$('#react'); el.style.transition='opacity .45s'; el.style.opacity='0'; setTimeout(()=>{ try{ el.style.backgroundImage=reactBg(); }catch(e){} },300); setTimeout(()=>{ REACT_SOFT=true; react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500); REACT_SOFT=false; el.style.opacity='1'; setTimeout(()=>{ el.style.transition=''; },500); },500); } Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
+  function musicFor(slow){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen,!!slow); }
+  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; { const el=$('#react'); el.style.transition='opacity .45s'; el.style.opacity='0'; setTimeout(()=>{ try{ el.style.backgroundImage=reactBg(); }catch(e){} },300); setTimeout(()=>{ REACT_SOFT=true; react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500); REACT_SOFT=false; el.style.opacity='1'; setTimeout(()=>{ el.style.transition=''; },500); },500); } Music.play(toId==='pueblo'?'pueblo':toId,true); blip(520,.08,'triangle',.08); }
   function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=195*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
   let stepAcc=0, stepSide=1;
   function step(now){ if(current!=='mapa') return; { const wrap=$('#mapWrap'); if(wrap&&(wrap.clientWidth!==VW||wrap.clientHeight!==VH)) size(); } const dt=Math.min(.05,(now-(last||now))/1000); last=now; const t=now/1000;
@@ -1471,7 +1471,7 @@ MODULES.mapa=(()=>{
     if(g.screen&&SC[g.screen]&&g.pos&&g.pos.x>20&&g.pos.y>20&&g.pos.x<MW-20&&g.pos.y<MH-20&&(maskOk(SC[g.screen].img,g.pos.x,g.pos.y)!==false)&&(g.screen==='pueblo'||g.screen==='dibujo'||phaseOfBiome(g.screen))){ screen=g.screen; pos={x:g.pos.x,y:g.pos.y}; if(startFace){ face=startFace; startFace=null; } } else { screen='pueblo'; pos={x:765,y:590}; face='down'; } // por defecto: en la plaza, junto a la fuente
     const cm=camFor(pos); camX=cm.x; camY=cm.y; renderMedallero(); hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step);
     const nt=nextTarget(); $('#btnAuto').textContent=nt==='dibujo'?(screen==='dibujo'?'✨ Ir al Templo':dibujoUnlocked()||forceTemple?'✨ Ir al portal':'🚶 Volver al pueblo'):'🚶 Ir a Gimnasio '+PHASES.find(p=>p.id===nt).name;
-    musicFor();
+    if(!g.newMedal) musicFor(); /* si hay insignia pendiente, sigue la música de victoria hasta cerrar la tarjeta */ react('normal',0);
     if(g.newMedal){ const m=g.newMedal; g.newMedal=null; saveG(g); setTimeout(()=>badgeAnim(m),400); }
     window.addEventListener('resize',size); }
   function stop(){ if(raf)cancelAnimationFrame(raf); raf=null; window.removeEventListener('resize',size); if(started&&pos.x>0&&pos.y>0){ const g=G(); g.pos=pos; g.screen=screen; saveG(g); } }
@@ -1497,13 +1497,13 @@ function dexIntro(id,go){ react('sorpresa',2500,true); setTimeout(()=>{ blip(220
   Music.play('entrada'); const im=$('#dexImg'); im.src=pk?('assets/boss/'+pk.id+'_arte.png'):''; im.style.clipPath='inset(0 0 100% 0)'; im.style.filter='brightness(2.2) saturate(.2)'; let pct=0;
   const tick=()=>{ if(ov.classList.contains('hidden'))return; pct+=3; im.style.clipPath=`inset(0 0 ${Math.max(0,100-pct)}% 0)`; if(pct%12===0)blip(300+pct*8,.03,'square',.05); if(pct<100) setTimeout(tick,45); else { im.style.transition='filter .6s'; im.style.filter='none'; $('#dexScanTxt').textContent='Registro completado ✓'; jingle8([523,659,784,1047],.1);
       $('#dexNum').textContent='N.º 00'+(BIOME_IDS.indexOf(pk.biome)+1); typeText($('#dexName'),pk?pk.name.toUpperCase():'DESCONOCIDO',()=>{ $('#dexType').textContent=pk.tipo; $('#dexStats').innerHTML=`<span>Altura</span><b>${pk.altura}</b><span>Peso</span><b>${pk.peso}</b>`; $('#dexDesc').textContent=pk.desc; $('#dexGym').innerHTML='LÍDER DE <img src="'+LBL(id)+'" style="height:30px;filter:drop-shadow(2px 2px 0 #000)">'; $('#dexGo').classList.remove('hidden'); }); } }; setTimeout(tick,300);
-  $('#dexGo').onclick=()=>{ ov.classList.add('hidden'); Music.stop(); go(); }; }
+  $('#dexGo').onclick=()=>{ ov.classList.add('hidden'); Music.stop(true); go(); }; }
 function typeText(el,txt,done){ el.textContent=''; let i=0; const t=()=>{ el.textContent=txt.slice(0,++i); if(i%2===0)blip(900,.02,'square',.04); if(i<txt.length) setTimeout(t,45); else if(done) done(); }; t(); }
 /* --- insignia --- */
 function badgeAnim(phase){ react('ilusionado',3000,true); const ph=PHASES.find(p=>p.id===phase); const ov=$('#badgeOv'); $('#badgeBig').innerHTML=badgeSVG(phase); $('#badgeTxt').textContent='¡INSIGNIA DE '+ph.name.toUpperCase()+'!'; $('#badgeSub').textContent=phase==='dibujo'?'¡Pablo ha completado el Templo del Dibujo y toda la aventura!':'Pablo ha superado el Gimnasio '+ph.name+'. ¡Ya está en el medallero!'; ov.classList.remove('hidden'); jingle8([784,988,1175,1568,1175,1568],.11); burst(50); renderMedallero(phase);
-  $('#badgeOk').onclick=()=>{ ov.classList.add('hidden'); if(phase==='dibujo') showEnd(); else if(dibujoUnlocked()&&!G().templeShown){ const g=G(); g.templeShown=true; saveG(g); templeUnlocked(); } }; }
+  $('#badgeOk').onclick=()=>{ ov.classList.add('hidden'); if(phase==='dibujo') showEnd(); else if(dibujoUnlocked()&&!G().templeShown){ const g=G(); g.templeShown=true; saveG(g); templeUnlocked(); } else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(true); /* al cerrar la insignia, fundido lento hacia la música del pueblo */ }; }
 function showEnd(){ const ov=$('#endScreen'); ov.classList.remove('hidden'); Music.play('final'); burst(120); setTimeout(()=>burst(80),1200); $('#endOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); react('despidiendose',4000,true); setTimeout(()=>react('enamorado',5000),4200); }; }
-function templeUnlocked(){ const ov=$('#templeOv'); if(!ov) return; ov.classList.remove('hidden'); react('entusiasmado',0,true); Music.play('victoria'); burst(90); $('#templeOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); }; }
+function templeUnlocked(){ const ov=$('#templeOv'); if(!ov) return; ov.classList.remove('hidden'); react('entusiasmado',0,true); Music.play('victoria'); burst(90); $('#templeOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo',true); }; }
 /* --- combate: lanzar la bola --- */
 // interior épico del gimnasio para el combate: fondo del diseño + suelo en perspectiva + antorchas/focos, con píxel fino
 function drawArena(cv,design){ const W=cv.clientWidth||1280,H=cv.clientHeight||700; cv.width=W; cv.height=H; const c=cv.getContext('2d'); const hz=Math.round(H*.55);
