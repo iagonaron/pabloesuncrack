@@ -1,0 +1,15 @@
+PABLO ES UN CRACK EN:  — app para clase individual (tablet / pantalla táctil, 4:3)
+
+Abrir:  index.html  (Chrome o Safari). Para Entonación hace falta permitir el micrófono.
+        Si se abre como archivo local y el micro no funciona, sirve la carpeta con un servidor local
+        (por ejemplo:  python3 -m http.server 8080  → http://localhost:8080) o súbela a GitHub Pages.
+
+Es un juego: mapa 16 bits con joystick (izquierda) → 4 gimnasios en orden (Teoría, Ritmo, Audición, Entonación) → prueba musical (3-4 min) → estrellas (mínimo 1) → Pablo avanza hasta el líder (el Pokémon del día) → intenta capturarlo (3★ 90 %, 2★ 60 %, 1★ 30 %). 2★ o 3★ dan la insignia del medallero. Al pasar por los 4 gimnasios se abre Dibujo.
+Carpeta assets/: logo y carteles (tus imágenes) — no la muevas.
+Cada día la app elige 4 imágenes de pokemon/ (una por fase, Dibujo no lleva) y tiñe cada fase con sus colores.
+
+Ajustes (⚙️ abajo a la derecha en el inicio): rondas, tempo, notas más agudas, corcheas sí/no,
+segundos por nota, piano de ayuda al cantar… y la Pokédex (nombres, quitar de rotación, añadir imágenes solo en ese dispositivo).
+Los ajustes y el progreso del día se guardan en el navegador de ese dispositivo.
+
+Añadir Pokémon de forma permanente: copia las imágenes en pokemon/ y ejecuta  python3 generar_pokedex.py
