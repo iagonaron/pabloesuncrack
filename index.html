@@ -251,7 +251,7 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 #titleScreen::before{content:"";position:absolute;inset:-40px;background:url(assets/title_bg.jpg) center/cover;filter:blur(18px) brightness(.55)}
 .tArt{position:relative;height:100%;aspect-ratio:16/9;max-width:100%;max-height:100%}
 @media (max-aspect-ratio:16/9){.tArt{height:auto;width:100%}}
-.tArt img{width:100%;height:100%;display:block;object-fit:cover;animation:tkb 14s ease-in-out infinite alternate,tfade 1.4s ease-out}
+.tArt img{width:100%;height:100%;display:block;object-fit:cover;animation:tfade 1.4s ease-out}
 @keyframes tkb{from{transform:scale(1)}to{transform:scale(1.06)}}
 @keyframes tfade{from{opacity:0;filter:brightness(3)}to{opacity:1;filter:brightness(1)}}
 .tArt{overflow:hidden}
@@ -1184,15 +1184,17 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   function playChip(name){ if(muted)return; const c=ac(); if(!c||!SONGS[name])return; if(cur===name)return; stopChip(); cur=name; gain=c.createGain(); gain.gain.value=SONGS[name].vol; gain.connect(master()); step=0; nextT=c.currentTime+.05; timer=setInterval(tick,100); tick(); }
   function stopChip(){ if(timer)clearInterval(timer); timer=null; cur=null; if(gain){ try{ gain.gain.setTargetAtTime(0,ac().currentTime,.05); const g=gain; setTimeout(()=>g.disconnect(),400); }catch(e){} gain=null; } }
   /* ---- pistas de Iago (mp3) con fundidos cruzados y entrada en un punto aleatorio ---- */
-  const TRACKS={pueblo:'assets/audio/pueblo.mp3',hielo:'assets/audio/hielo.mp3',fuego:'assets/audio/fuego.mp3',pantano:'assets/audio/pantano.mp3',magia:'assets/audio/magia.mp3',roca:'assets/audio/roca.mp3',desierto:'assets/audio/desierto.mp3',dibujo:'assets/audio/dibujo.mp3',combate:'assets/audio/combate.mp3',accion:'assets/audio/accion.mp3',capturado:'assets/audio/capturado.mp3',entrada:'assets/audio/entrada.mp3',escapa:'assets/audio/escapa.mp3',base:'assets/audio/base.mp3',final:'assets/audio/final.mp3'};
+  const TRACKS={pueblo:'assets/audio/pueblo.mp3',hielo:'assets/audio/hielo.mp3',fuego:'assets/audio/fuego.mp3',pantano:'assets/audio/pantano.mp3',magia:'assets/audio/magia.mp3',roca:'assets/audio/roca.mp3',desierto:'assets/audio/desierto.mp3',dibujo:'assets/audio/dibujo.mp3',combate:'assets/audio/combate.mp3',accion:'assets/audio/accion.mp3',capturado:'assets/audio/capturado.mp3',entrada:'assets/audio/entrada.mp3',escapa:'assets/audio/escapa.mp3',base:'assets/audio/base.mp3',final:'assets/audio/final.mp3',opening:'assets/audio/opening.mp3'};
   const ONESHOT={capturado:0,entrada:9,escapa:8}; // segundos antes de fundir (0 = entera)
-  const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final'};
+  const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
   const VOL=.5; let aCur=null,aName=null,fades=[];
   function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
   function playTrack(name){ if(aName===name&&aCur&&!aCur.paused) return; const old=aCur; if(old){ old.__kill=false; fadeTo(old,0,1200,()=>{ old.pause(); old.src=''; }); }
     const el=new Audio(TRACKS[name]); const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
-    const start=()=>{ try{ if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} el.play().catch(()=>{}); fadeTo(el,VOL,one?300:1500); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000); };
-    if(el.readyState>=1) start(); else el.addEventListener('loadedmetadata',start,{once:true}); }
+    const seek=()=>{ try{ if(!one&&name!=='final'&&name!=='base'&&name!=='opening'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
+    // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
+    el.play().catch(()=>{}); fadeTo(el,VOL,one?300:1500); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
+    if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
   function stopTrack(){ if(aCur){ const old=aCur; fadeTo(old,0,700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
   function play(name){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr); return; } stopTrack(); playChip(name); }
   function stop(){ stopChip(); stopTrack(); }
@@ -1521,7 +1523,7 @@ $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
     const rg=c.createRadialGradient(W*.5,H*.5,50,W*.5,H*.5,W*.7); rg.addColorStop(0,'rgba(255,255,255,.12)'); rg.addColorStop(1,'rgba(0,0,0,.35)'); c.fillStyle=rg; c.fillRect(0,0,W,H);
     if(!$('#titleScreen').classList.contains('hidden')) raf=requestAnimationFrame(draw); }
   
-  const introMusic=()=>{ if($('#titleScreen').classList.contains('hidden')) return; ac(); Music.play('base'); };
+  const introMusic=()=>{ if($('#titleScreen').classList.contains('hidden')) return; ac(); Music.play('opening'); };
   setTimeout(introMusic,300); ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,introMusic,{once:true,capture:true}));
   $('#tGear').onclick=()=>{ ac(); $('#titleScreen').classList.add('hidden'); renderAdmin(); show('admin'); };
   $('#btnStart').onclick=()=>{ ac(); loadPiano(); $('#titleScreen').classList.add('hidden'); jingle8([523,659,784,1047],.09); if(current==='mapa'){ Music.play('paseo'); window.__mapDirty&&window.__mapDirty(); } };
