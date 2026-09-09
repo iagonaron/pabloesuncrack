@@ -29,12 +29,13 @@
   --title:"Luckiest Guy","Nunito",Arial,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;width:100%;-webkit-text-size-adjust:100%}
 body{font-family:var(--font);color:var(--text);background:radial-gradient(120% 90% at 20% 0%,var(--bg1),var(--bg2)) fixed;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
 button{font-family:inherit;font-weight:900;cursor:pointer;border:0;color:var(--ink)}
 button:active{transform:scale(.96)}
-#app{position:relative;width:100vw;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+#app{position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
 
 /* blobs */
 .sky{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
@@ -257,11 +258,14 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 
 .tGear{position:absolute;left:78.5%;top:88.5%;width:6%;height:8%;background:transparent;border:0;cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 0 0 6px rgba(255,220,60,.55),0 0 30px rgba(255,220,60,.6)}}
-#react{position:fixed;right:18px;bottom:8px;z-index:150;--rs:min(264px,26vw);width:var(--rs);height:var(--rs);padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
+#react{position:fixed;right:18px;bottom:8px;z-index:150;background-size:cover!important;background-position:center;--rs:min(264px,26vw);width:var(--rs);height:var(--rs);padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
 #react.hidden{display:none}
 #react img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
 #react.big{--rs:min(300px,32vw);bottom:96px}
 #react.onmap{bottom:22px}
+#react.inbattle{left:14px;top:14px;right:auto;bottom:auto;transform-origin:top left}
+#react.inbattle.big{--rs:min(240px,26vw)}
+#battle .bName{left:50%;transform:translateX(-50%)}
 @keyframes rpop{from{transform:scale(.3) rotate(-8deg);opacity:0}}
 @keyframes rshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 #react.shake{animation:rshake .3s 2}
@@ -323,7 +327,7 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 #bossScene canvas{width:100%;height:100%;display:block}
 #bossScene.hidden{display:none}
 #bossScene.quake{animation:quake .7s}
-.prompt{position:absolute;left:50%;bottom:26px;z-index:6;transform:translateX(-50%);background:#fff;border:5px solid #111;border-radius:10px;padding:18px 26px;box-shadow:6px 6px 0 #000;display:flex;align-items:center;gap:22px;color:#111}
+.prompt{position:absolute;left:calc(50% - 70px);bottom:26px;z-index:6;transform:translateX(-50%);background:#fff;border:5px solid #111;border-radius:10px;padding:18px 26px;box-shadow:6px 6px 0 #000;display:flex;align-items:center;gap:22px;color:#111}
 .prompt .pf{font-size:16px;max-width:420px}
 .ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff}
 /* escáner */
@@ -464,7 +468,7 @@ main{position:relative}
         <canvas id="mapCv"></canvas>
         <div class="hud">
           <div class="hudTitle"><img class="hudLogo" src="assets/logo.png" alt="Pablo es un crack"></div>
-          <button class="rbtn" id="btnCaught" title="Capturados"><span id="caughtN">0</span></button>
+          <button class="rbtn" id="btnCaught" title="Capturados" style="display:none"><span id="caughtN">0</span></button>
           <button class="rbtn" id="btnMute" title="Música"></button>
           <button class="rbtn" id="btnFull" title="Pantalla completa"></button>
           <button class="rbtn" id="btnAdmin" title="Ajustes del profe"></button>
@@ -486,16 +490,13 @@ main{position:relative}
     <!-- ADMIN -->
     <section class="screen" id="admin" hidden>
       <div class="panel">
-        <h2>Pokédex (imágenes de Pablo)</h2>
-        <p style="margin:4px 0 10px;font-weight:700">Las imágenes de la carpeta <b>pokemon/</b> ya están cargadas (para añadir más de forma permanente, mételas en esa carpeta y vuelve a generar <b>pokedex.js</b>). Aquí puedes cambiarles el nombre, quitarlas de la rotación o añadir otras solo en este dispositivo. Cada día la app elige 4 al azar (Teoría, Ritmo, Audición y Entonación) y tiñe cada fase con los colores de su imagen.</p>
-        <div class="drop" id="drop">📥 Arrastra imágenes aquí o <label style="text-decoration:underline;cursor:pointer">elige archivos<input type="file" id="fileIn" accept="image/*" multiple class="hidden"></label></div>
+        <h2>Partida</h2>
+        <p style="margin:4px 0 10px;font-weight:700">Cada partida elige 4 de los 6 biomas (con su líder) y los coloca en las salidas del pueblo. Al reiniciar se borran las insignias, las capturas y la posición, y se vuelve a la portada.</p>
         <div class="row" style="justify-content:flex-start;margin:10px 0">
-          <button class="admbtn" id="btnExport">⬇️ Exportar Pokédex (JSON)</button>
-          <label class="admbtn" style="cursor:pointer">⬆️ Importar Pokédex<input type="file" id="importIn" accept="application/json" class="hidden"></label>
-          <button class="admbtn" id="btnReshuffle">🎲 Cambiar los Pokémon de hoy</button>
-          <span id="pkCount" style="font-weight:800"></span>
+          <button class="admbtn" id="btnRestart">🔄 Reiniciar partida</button>
+          <button class="admbtn" id="btnReshuffle">🎲 Cambiar los biomas de hoy</button>
         </div>
-        <div class="pokelist" id="pokelist"></div>
+        <div class="hidden"><div id="drop"></div><input type="file" id="fileIn" class="hidden"><input type="file" id="importIn" class="hidden"><button id="btnExport"></button><span id="pkCount"></span><div id="pokelist"></div></div>
       </div>
       <div class="panel">
         <h2>Dificultad y duración</h2>
@@ -628,8 +629,25 @@ function tone(t0,midi,dur,gain,type){ const c=ac(); if(!c)return; const m=sfxbus
   g.gain.setValueAtTime(.0001,t0); g.gain.exponentialRampToValueAtTime(gain||.4,t0+.02); g.gain.exponentialRampToValueAtTime(.0001,t0+dur); o.connect(g); g.connect(m); o.start(t0); o.stop(t0+dur+.02); }
 /* ===== REACCIONES DE PABLO (recortes de la hoja de Iago) ===== */
 const REACT_T={normal:0,decidido:0,pensativo:0,pensativo2:0}; let reactTm=null;
-function react(name,ms,big){ const el=$('#react'); if(!el)return; const im=$('#reactImg'); im.src='assets/react/'+name+'_png.png'; el.classList.remove('hidden'); el.classList.toggle('big',!!big); el.classList.toggle('onmap',current==='mapa'); el.style.animation='none'; void el.offsetWidth; el.style.animation=''; clearTimeout(reactTm);
-  if(ms){ reactTm=setTimeout(()=>{ im.src='assets/react/'+(current==='mapa'?'normal':'decidido')+'_png.png'; el.classList.remove('big'); },ms); } }
+/* Reacciones de Pablo (hoja react2, 28 caras). RMAP traduce nombres antiguos. SEEN registra cuáles han salido en la partida para ir variando. */
+const RMAP={sorpresa:'sorprendido',observa:'nervioso',captura:'serio',capturado:'victoria',lanza:'entusiasmado',recibe:'ilusionado',usa:'idea',recupera:'contento',subenivel:'ilusionado',orden:'decidido',pensativo2:'pensativo'};
+const RALL=['normal','alegre','contento','sorprendido','entusiasmado','decidido','pensativo','confundido','nervioso','asustado','enojado','triste','decepcionado','avergonzado','cansado','molesto','ilusionado','idea','seguro','saludando','despidiendose','victoria','derrota','llorando','enamorado','serio','sufriendo','rie'];
+let RESULT_MODE=false; const PLAY_T0=Date.now();
+function rseen(){ return loadJSON('pec_rseen',{}); }
+// elige entre varias caras la que menos veces ha salido (así, a lo largo de la partida, aparecen todas)
+function rpick(list){ const sn=rseen(); let best=list[0],bv=1e9; list.forEach(n=>{ const v=sn[n]||0; if(v<bv||(v===bv&&Math.random()<.5)){ bv=v; best=n; } }); return best; }
+function reactBg(){ // fondo del recuadro según dónde estemos: bioma (exterior/interior)
+  let b='pueblo', inside=false;
+  if(current==='mapa'&&window.__mapCtx){ const c=window.__mapCtx(); b=c.biome; inside=c.inside; }
+  else if(current==='dibujo'){ b='dibujo'; inside=true; }
+  else if(GYMS.includes(current)){ b=TODAY_BIOMES[current]||'pueblo'; inside=true; }
+  if(!$('#battle').classList.contains('hidden')&&window.__battleBiome){ b=window.__battleBiome; inside=true; }
+  return `url("assets/rbg/${b}_${inside?'int':'ext'}.jpg")`; }
+function react(name,ms,big){ const el=$('#react'); if(!el)return; if(GYMS.includes(current)&&!RESULT_MODE){ el.classList.add('hidden'); return; } try{ el.style.backgroundImage=reactBg(); }catch(e){} name=RMAP[name]||name; if(!RALL.includes(name)) name='normal'; const sn=rseen(); sn[name]=(sn[name]||0)+1; saveJSON('pec_rseen',sn);
+  const im=$('#reactImg'); im.src='assets/react2/'+name+'.png'; el.classList.remove('hidden'); el.classList.toggle('big',!!big); el.classList.toggle('onmap',current==='mapa'); el.style.animation='none'; void el.offsetWidth; el.style.animation=''; clearTimeout(reactTm);
+  if(ms){ reactTm=setTimeout(()=>{ im.src='assets/react2/'+(current==='mapa'?'normal':'decidido')+'.png'; el.classList.remove('big'); },ms); } }
+// caras "de fondo" en el mapa: cada ~40 s, si no hay otra reacción, una cara distinta; con más de 25 min de juego, a veces "cansado"
+setInterval(()=>{ if(current!=='mapa'||document.hidden) return; const el=$('#react'); if(!el||el.classList.contains('big')) return; const tired=(Date.now()-PLAY_T0)>25*60*1000&&Math.random()<.5; react(tired?'cansado':rpick(['normal','pensativo','confundido','saludando','rie','avergonzado','seguro','alegre']),6000); },40000);
 function reactHide(){ const el=$('#react'); if(el) el.classList.add('hidden'); clearTimeout(reactTm); }
 ['normal','decidido','sorprendido','contento','enfadado','triste','pensativo','pensativo2','combate','lanza','orden','observa','sorpresa','derrota','captura','capturado','victoria','recibe','usa','recupera','subenivel'].forEach(n=>{ const i=new Image(); i.src='assets/react/'+n+'_png.png'; });
 function sfxOk(){ react('contento',1400); const c=ac(); if(!c)return; const t=c.currentTime; tone(t,79,.18,.3,'sine'); tone(t+.1,84,.3,.3,'sine'); }
@@ -720,18 +738,18 @@ function getCaught(){ return loadJSON('pec_caught',[]); }
 const PROB={3:{p:.9,t:'ALTAS',c:'alta'},2:{p:.6,t:'MEDIAS',c:'media'},1:{p:.3,t:'BAJAS',c:'baja'}};
 // probabilidad exacta = porcentaje de aciertos de la prueba (mínimo 5 %)
 function probOf(pct,stars){ if(pct==null) pct=(PROB[stars]||PROB[1]).p*100; const p=Math.max(5,Math.min(100,Math.round(pct))); return {p:p/100,pct:p,t:p>=75?'ALTAS':p>=45?'MEDIAS':'BAJAS',c:p>=75?'alta':p>=45?'media':'baja'}; }
-function gymResult(root,phase,stars,detail,again,pct){ react(stars>=3?'victoria':stars>=2?'contento':'triste',0,true); const pk=TODAY[phase]; const pr=probOf(pct,stars);
+function gymResult(root,phase,stars,detail,again,pct){ RESULT_MODE=true; react(pct>=90?'enamorado':pct>=70?rpick(['contento','alegre','entusiasmado','idea']):pct>=50?rpick(['decepcionado','pensativo','avergonzado']):rpick(['llorando','triste','sufriendo']),0,true); const pk=TODAY[phase]; const pr=probOf(pct,stars);
   // sin tarjeta de estrellas: solo el porcentaje de éxito, y enseguida al pasillo del líder
   root.innerHTML=`<div class="result"><div class="pctBig pf">${pct}%</div><div class="pf" style="font-size:16px;color:#fff;text-shadow:3px 3px 0 #000;text-align:center">de aciertos</div>
     <div class="prob ${pr.c}">Posibilidades de capturar${pk?' a '+pk.name.toUpperCase():'lo'}: ${pr.pct}% (${pr.t})</div></div>`;
   Music.play('accion'); burst(30);
   setTimeout(()=>{ if(current===phase) gymWalk(phase,stars,pct); },2600); }
 /* pasillo del gimnasio: Pablo camina con el joystick hasta el líder y pulsa CAPTÚRALO */
-function gymWalk(phase,stars,pct){ $('#gymWalk').classList.add('hidden'); MODULES.mapa.interior(phase,stars,pct); }
+function gymWalk(phase,stars,pct){ RESULT_MODE=false; $('#gymWalk').classList.add('hidden'); MODULES.mapa.interior(phase,stars,pct); }
 
 /* ---------------- navegación ---------------- */
 let current='mapa'; const MODULES={};
-function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin') reactHide(); if(id==='dibujo') Music.play('dibujo');
+function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); if(id==='dibujo') Music.play('dibujo');
   $$('.screen').forEach(s=>s.hidden=s.id!==id); const ph=PHASES.find(p=>p.id===id); document.body.classList.toggle('mapmode',id==='mapa');
   if(ph){ applyTheme(id); $('#hTitle').textContent='Gimnasio '+ph.name; $('#hLbl').src=LBL(id); $('#hLbl').classList.remove('hidden'); $('#hTitle').classList.add('hidden'); $('#hStars').innerHTML=''; }
   else { applyTheme(null); $('#hLbl').classList.add('hidden'); $('#hTitle').classList.remove('hidden'); $('#hTitle').textContent=id==='admin'?'Ajustes':'…'; $('#hStars').innerHTML=''; }
@@ -835,6 +853,8 @@ function drawSystem(div,bars,opt){ opt=opt||{}; div.innerHTML=''; const S=opt.sc
     const beams=opt.noBeam?[]:Beam.generateBeams(notes); const tb=(opt.time||'2/4').split('/');
     const voice=new Voice({num_beats:+tb[0],beat_value:+tb[1]}).setStrict(false).addTickables(notes); new Formatter().joinVoices([voice]).formatToStave([voice],st); voice.draw(ctx,st); beams.forEach(b=>b.setContext(ctx).draw());
     notes.forEach(sn=>out.push({el:sn.getSVGElement?sn.getSVGElement():null,x:sn.getAbsoluteX()*S})); x+=w; });
+  // que nunca se recorten los nombres de las notas: si el dibujo sobresale por abajo, se amplía el SVG
+  try{ const svg=div.querySelector('svg'); const bb=svg.getBBox(); const need=Math.ceil(bb.y+bb.height+6); if(need>H){ svg.setAttribute('height',need); svg.style.height=need+'px'; } }catch(e){}
   return out; }
 
 /* ---------------- generador de frases (Do4–…) ---------------- */
@@ -857,7 +877,7 @@ MODULES.teoria=(()=>{ const root=$('#teoria'); let mel=[],cur=0,errs=0,streak=0,
       const answered=idx<cur, isCur=idx===cur&&!corrected; const ok=corrected?ans[idx]===NOTE_NAMES[n.deg]:null;
       return {deg:n.deg,dur:n.dur,color:corrected?(ok?'#1faa59':'#d63a4a'):(isCur?'#16132b':(answered?'#16132b':'#b8b8c8')),
         text:answered?ans[idx]:(isCur?'▲':''),textColor:corrected?(ok?'#1faa59':'#d63a4a'):(answered?(NOTE_COL[ans[idx]]||'#16132b'):'#16132b')}; })});
-      const three=sysDivs.length>=3; const sh=window.innerHeight<820?(three?112:130):(three?140:165); const sc=window.innerHeight<820?(three?.82:.9):(three?.95:1.05); drawSystem(div,slice,{height:sh,scale:sc,first:true,showTime:si===0,end:si===sysDivs.length-1,annSize:20}); }); $('#hStars').innerHTML=`${Math.min(cur,mel.length)}/${mel.length}`; }
+      const three=sysDivs.length>=3; const sh=window.innerHeight<820?(three?112:130):(three?140:165); const sc=window.innerHeight<820?(three?.8:.9):(three?.92:1.05); drawSystem(div,slice,{height:sh,scale:sc,top:10,first:true,showTime:si===0,end:si===sysDivs.length-1,annSize:20}); }); $('#hStars').innerHTML=`${Math.min(cur,mel.length)}/${mel.length}`; }
   function start(){ mel=gen(); cur=0; errs=0; streak=0; done=false; ans=[]; corrected=false; const nSys=Math.ceil((CFG.teoBars|0||8)/4);
     root.innerHTML=`<div class="teoTools"><button class="bigbtn sec small" style="font-size:16px;padding:7px 12px" id="teoPlay">🔊 Escuchar</button><button class="bigbtn sec small" style="font-size:16px;padding:7px 12px" id="teoUndo">↶ Borrar última</button></div>
       <div class="paper" id="teoPaper">${Array.from({length:nSys},(_,i)=>`<div class="sys" id="teoSys${i}"></div>`).join('')}<button class="pixbtn hidden" id="teoCheck">✔ CORREGIR</button></div>
@@ -1213,7 +1233,7 @@ $('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$
 function drawPix(ctx,rows,x,y,px,flip,legs){ const side=rows===SPR.side; rows.forEach((row,j)=>{ let r=row; if(legs&&j>=31){ r=(side?LEGS_SIDE:LEGS)[legs][j-31]||row; } for(let i=0;i<r.length;i++){ const ch=r[i]; if(ch==='.')continue; ctx.fillStyle=PAL[ch]||'#000'; const xi=flip?(r.length-1-i):i; ctx.fillRect(Math.round(x+xi*px),Math.round(y+j*px),Math.ceil(px),Math.ceil(px)); } }); }
 function pixelSprite(src,n,cb){ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=n; c.height=n; const x=c.getContext('2d'); const s=Math.min(im.width,im.height); x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,n,n); cb(c); }; im.onerror=()=>cb(null); im.src=src; }
 function blitPix(target,small,scale){ if(!small){ target.width=target.height=8; return; } target.width=small.width*(scale||8); target.height=small.height*(scale||8); const x=target.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(small,0,0,target.width,target.height); }
-function badgeSVG(phase){ const bi=TODAY_BIOMES[phase]; if(bi) return `<img src="assets/badges/${bi}.png" alt="" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))">`; const ph=PHASES.find(p=>p.id===phase); const pk=TODAY[phase]; const tv=themeVars((pk&&pk.colors)||ph.def);
+function badgeSVG(phase){ const bi=phase==='dibujo'?'dibujo':TODAY_BIOMES[phase]; if(bi) return `<img src="assets/badges/${bi}.png" alt="" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))">`; const ph=PHASES.find(p=>p.id===phase); const pk=TODAY[phase]; const tv=themeVars((pk&&pk.colors)||ph.def);
   return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 3 L58 12 V32 C58 47 46 57 32 62 C18 57 6 47 6 32 V12 Z" fill="${tv.acc}" stroke="#111" stroke-width="4"/><text x="32" y="42" font-size="26" text-anchor="middle">${ph.emoji}</text></svg>`; }
 function renderMedallero(anim){ const g=G(); const m=$('#medallero'); m.innerHTML=GYMS.map(p=>`<div class="mslot ${g.medals.includes(p)?'has':''} ${anim===p?'new':''}" title="${PHASES.find(x=>x.id===p).name}">${g.medals.includes(p)?badgeSVG(p):'<span class="q">?</span>'}</div>`).join('');
   $('#caughtN').textContent=getCaught().length; }
@@ -1230,12 +1250,12 @@ MODULES.mapa=(()=>{
     magia:{img:'magia',w:36,entry:[761,1002],sign:[650,930],door:[312,243],paths:[[[768, 1020], [768, 911], [790, 867], [834, 845], [900, 834], [965, 834], [1042, 823], [1108, 801], [1163, 768], [1196, 713], [1207, 669], [1196, 614], [1163, 570], [1141, 548], [1086, 581], [987, 592], [900, 581], [856, 570], [790, 548], [713, 538], [658, 527], [614, 516], [614, 494], [570, 461], [516, 439], [472, 417], [439, 384], [378, 378], [346, 351], [324, 318], [313, 291]],[[1141, 548], [1108, 527], [1075, 483], [1031, 461], [965, 450]]]},
     roca:{img:'roca',w:36,entry:[769,1002],sign:[640,900],door:[1139,190],paths:[[[770,1024],[770,905],[770,860],[800,838],[860,830],[950,820],[1040,790],[1120,770],[1170,730],[1180,680],[1165,640],[1120,610],[1080,590],[1070,540],[1070,490],[1085,440],[1105,395],[1125,345],[1140,300],[1140,245]],[[1070,490],[1000,470],[900,465],[800,430],[700,380],[620,340],[590,320],[650,280],[710,265],[765,250],[800,215],[830,180],[870,145],[920,135]],[[770,860],[770,800],[760,745],[720,705],[670,685],[620,660],[575,615],[530,570],[480,548],[440,535],[455,480],[510,430],[560,380],[590,330]],[[575,615],[520,640],[460,655],[400,660]]]},
     desierto:{img:'desierto',w:36,entry:[750,1004],sign:[630,900],door:[763,186],paths:[[[750,1024],[750,900],[760,840],[790,800],[830,770],[880,740],[930,715],[970,690],[980,650],[985,600],[980,540],[975,470],[965,400],[960,350],[940,315],[890,300],[840,285],[800,265],[775,245],[770,200]],[[960,380],[900,400],[840,410],[780,440],[735,480],[690,485],[640,468],[590,448],[540,420],[485,400],[430,385],[370,380],[320,375],[270,378],[225,385],[185,400]],[[880,740],[950,765],[1030,785],[1100,790],[1170,775],[1230,750],[1290,735]]]},
-    int_hielo:{img:'int_hielo',w:44,interior:'hielo',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_fuego:{img:'int_fuego',w:44,interior:'fuego',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_pantano:{img:'int_pantano',w:44,interior:'pantano',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_magia:{img:'int_magia',w:44,interior:'magia',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_roca:{img:'int_roca',w:44,interior:'roca',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_desierto:{img:'int_desierto',w:44,interior:'desierto',entry:[768,990],door:[768,285],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_hielo:{img:'int_hielo',w:44,interior:'hielo',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_fuego:{img:'int_fuego',w:44,interior:'fuego',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_pantano:{img:'int_pantano',w:44,interior:'pantano',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_magia:{img:'int_magia',w:44,interior:'magia',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_roca:{img:'int_roca',w:44,interior:'roca',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_desierto:{img:'int_desierto',w:44,interior:'desierto',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
     dibujo:{img:'dibujo',w:34,entry:[783,995],sign:null,door:[773,242],paths:[[[770,870],[770,830],[775,790],[790,740],[830,690],[870,640],[900,600],[920,560],[920,510],[900,470],[850,430],[800,390],[775,340],[775,290],[775,250]],[[790,740],[720,760],[650,750],[590,745],[540,715],[480,690],[450,640],[430,590],[410,545],[380,510],[330,495],[270,470]]]}
   };
   Object.values(SC).forEach(s=>{ s.P=s.paths.map(pl=>pl.map(p=>P(p[0],p[1]))); s.R=(s.rects||[]).map(r=>[r[0]*K,r[1]*K,r[2]*K,r[3]*K]); s.W=s.w*K; });
@@ -1246,7 +1266,7 @@ MODULES.mapa=(()=>{
   const phaseOfBiome=b=>GYMS.find(p=>TODAY_BIOMES[p]===b);
   const GYM={}; // compat: GYM[phase].biome
   function syncGym(){ GYMS.forEach(p=>{ GYM[p]={biome:TODAY_BIOMES[p]}; }); GYM.dibujo={biome:'dibujo'}; }
-  let cv,ctx,VW=0,VH=0,Z=1,raf=null,last=0,busy=false,atGym=null,pendingInterior=null; let screen='pueblo', pos={x:0,y:0}, face='down', vel={x:0,y:0}, route=null, walkT=0, trans=null, autoGoal=null, camX=0,camY=0; let forceTemple=false, startFace=null, started=false;
+  let cv,ctx,VW=0,VH=0,Z=1,raf=null,last=0,busy=false,atGym=null,pendingInterior=null; let screen='pueblo', pos={x:0,y:0}, face='down', vel={x:0,y:0}, route=null, walkT=0, trans=null, autoGoal=null, camX=0,camY=0; let forceTemple=false, startFace=null, started=false, walkCont=0;
   const IMGM=n=>getImg(n.startsWith('int_')?('assets/interiors/'+n.slice(4)+'.jpg'):('assets/maps/'+n+'.jpg')); const SIGN=n=>getImg('assets/signs/'+n+'.png');
   ['pueblo','hielo','fuego','pantano','magia','roca','desierto','dibujo'].forEach(n=>{ IMGM(n); SIGN(n); }); BIOME_IDS.forEach(b=>{ IMGM('int_'+b); getImg('assets/boss/'+BIOMES[b].boss+'_trono.png'); }); SIGN('generico'); PHASES.forEach(p=>getImg(LBL(p.id))); getImg('assets/portal_off.png'); getImg('assets/portal_on.png');
   ['down','up','left','right','downleft','downright','upleft','upright'].forEach(d=>{ for(let i=0;i<5;i++) getImg('assets/pablo8/'+d+'_'+i+'.png'); });
@@ -1348,14 +1368,14 @@ MODULES.mapa=(()=>{
   // ---- lógica ----
   function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
   function musicFor(){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen); }
-  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
-  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=150*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
+  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; setTimeout(()=>react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500),900); Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
+  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=150*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
   let stepAcc=0, stepSide=1;
-  function step(now){ if(current!=='mapa') return; const dt=Math.min(.05,(now-(last||now))/1000); last=now; const t=now/1000;
+  function step(now){ if(current!=='mapa') return; { const wrap=$('#mapWrap'); if(wrap&&(wrap.clientWidth!==VW||wrap.clientHeight!==VH)) size(); } const dt=Math.min(.05,(now-(last||now))/1000); last=now; const t=now/1000;
     if(trans){ trans.t+=dt/0.85; if(trans.t>=1){ const tr=trans; trans=null; busy=false; setScreen(tr.to,tr.toPos,tr.to==='pueblo'?(tr.dir==='S'?'down':tr.dir==='N'?'up':tr.dir==='E'?'right':'left'):'up'); if(tr.then) tr.then(); } draw(now,dt); raf=requestAnimationFrame(step); return; }
     if(!busy){ let dx=vel.x,dy=vel.y;
       if(route&&route.length){ const n=route[0]; const ddx=n.x-pos.x, ddy=n.y-pos.y; const d=Math.hypot(ddx,ddy); if(d<6){ route.shift(); if(!route.length){ route=null; onArrive(); } } else { dx=ddx/d; dy=ddy/d; } }
-      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; if(stepAcc>.28){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); }
+      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.28){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
     if(!trans&&!busy) doorCheck();
     }
     draw(now,dt); raf=requestAnimationFrame(step); }
@@ -1393,7 +1413,7 @@ MODULES.mapa=(()=>{
     c.restore();
     // viñeta
     const v=c.createRadialGradient(W/2,H*.45,H*.35,W/2,H*.45,H*.95); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,.55)'); c.fillStyle=v; c.fillRect(0,0,W,H); }
-  function onArrive(){ const s=SC[screen]; if(s.interior){ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('sorpresa',2500,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
+  function onArrive(){ const s=SC[screen]; if(s.interior){ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('asustado',2200,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); setTimeout(()=>react('decidido',0),2300); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
     if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<40){ face='up'; const ph=screen==='dibujo'?'dibujo':phaseOfBiome(screen); if(ph){ atGym=ph; showPrompt(ph); } } } }
   function snapWalk(s,x,y){ if(walkable(s,x,y)) return [x,y]; for(let r=6;r<=90;r+=6){ for(let a=0;a<12;a++){ const t=a/12*Math.PI*2; const nx=x+Math.cos(t)*r, ny=y+Math.sin(t)*r; if(walkable(s,nx,ny)) return [nx,ny]; } } return [x,y]; }
   let zoneArmed=true; // tras un cambio de pantalla, las zonas de salida no cuentan hasta que Pablo sale de ellas (evita el ping-pong)
@@ -1425,7 +1445,7 @@ MODULES.mapa=(()=>{
     else { const [ex,ey]=P(...s.entry); route=bfs(s,[pos.x,pos.y],[ex,ey+10]); } }
   function start(){ cv=$('#mapCv'); ctx=cv.getContext('2d'); assignExits(); syncGym(); size(); const g=G(); busy=false; trans=null; started=true;
     if(g.screen&&SC[g.screen]&&SC[g.screen].interior&&!pendingInterior){ const b=SC[g.screen].interior; const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===b); g.screen='pueblo'; if(d){ const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,50],S:[0,-50],E:[-50,0],W:[50,0]}[d]; g.pos={x:bx+inward[0],y:by+inward[1]}; startFace={N:'down',S:'up',E:'left',W:'right'}[d]; } else g.pos=null; saveG(g); }
-    if(pendingInterior){ const pi=pendingInterior; pendingInterior=null; screen='int_'+pi.biome; pos={x:SC[screen].entry[0],y:SC[screen].entry[1]}; face='up'; bossState={phase:pi.phase,stars:pi.stars,pct:pi.pct,shown:false}; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; route=null; hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step); Music.play('accion'); react('decidido',0); $('#btnAuto').textContent='🚶 Avanzar hacia el líder'; window.addEventListener('resize',size); return; }
+    if(pendingInterior){ const pi=pendingInterior; pendingInterior=null; screen='int_'+pi.biome; pos={x:SC[screen].entry[0],y:SC[screen].entry[1]}; face='up'; bossState={phase:pi.phase,stars:pi.stars,pct:pi.pct,shown:false}; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; route=null; hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step); Music.play('accion'); react('serio',0); $('#btnAuto').textContent='🚶 Avanzar hacia el líder'; window.addEventListener('resize',size); return; }
     bossState=null; bossSceneHide();
     if(g.screen&&SC[g.screen]&&g.pos&&g.pos.x>20&&g.pos.y>20&&g.pos.x<MW-20&&g.pos.y<MH-20&&(maskOk(SC[g.screen].img,g.pos.x,g.pos.y)!==false)&&(g.screen==='pueblo'||g.screen==='dibujo'||phaseOfBiome(g.screen))){ screen=g.screen; pos={x:g.pos.x,y:g.pos.y}; if(startFace){ face=startFace; startFace=null; } } else { screen='pueblo'; pos={x:765,y:590}; face='down'; } // por defecto: en la plaza, junto a la fuente
     const cm=camFor(pos); camX=cm.x; camY=cm.y; renderMedallero(); hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step);
@@ -1444,7 +1464,8 @@ MODULES.mapa=(()=>{
   window.addEventListener('keyup',e=>{ if(KEYS[e.code]){ held.delete(e.code); keyVel(); } });
   $('#btnAuto').onclick=()=>{ ac(); goAuto(); };
   $('#btnEnter').onclick=()=>{ ac(); if(atGym) enterGym(atGym); };
-  $('#mapCv').addEventListener('pointerdown',e=>{ if(busy)return; const r=cv.getBoundingClientRect(); const mx=(e.clientX-r.left+camX)/Z, my=(e.clientY-r.top+camY)/Z; const s=SC[screen]; ac(); if(atGym==='__boss') return; hidePrompt(); autoGoal=null; route=bfs(s,[pos.x,pos.y],[mx,my])||null; if(route&&route.length){ blip(1000,.04,'square',.05); const end=route[route.length-1]; FX.tap={x:end[0],y:end[1],t:performance.now()}; } else route=null; });
+  $('#mapCv').addEventListener('pointerdown',e=>{ if(busy)return; const r=cv.getBoundingClientRect(); const mx=(e.clientX-r.left+camX)/Z, my=(e.clientY-r.top+camY)/Z; const s=SC[screen]; ac(); if(atGym==='__boss') return; hidePrompt(); autoGoal=null; route=bfs(s,[pos.x,pos.y],[mx,my])||null; if(route&&route.length){ blip(1000,.04,'square',.05); const end=route[route.length-1]; FX.tap={x:end[0],y:end[1],t:performance.now()}; } else { route=null; react('confundido',1500); } });
+  window.__mapCtx=()=>{ const s=SC[screen]||{}; return {biome:s.interior||(screen==='pueblo'?'pueblo':screen),inside:!!s.interior}; };
   return {start,stop,goTemple,interior,musicFor};
 })();
 
@@ -1457,10 +1478,10 @@ function dexIntro(id,go){ react('sorpresa',2500,true); setTimeout(()=>{ blip(220
   $('#dexGo').onclick=()=>{ ov.classList.add('hidden'); Music.stop(); go(); }; }
 function typeText(el,txt,done){ el.textContent=''; let i=0; const t=()=>{ el.textContent=txt.slice(0,++i); if(i%2===0)blip(900,.02,'square',.04); if(i<txt.length) setTimeout(t,45); else if(done) done(); }; t(); }
 /* --- insignia --- */
-function badgeAnim(phase){ react('subenivel',3000,true); const ph=PHASES.find(p=>p.id===phase); const ov=$('#badgeOv'); $('#badgeBig').innerHTML=badgeSVG(phase); $('#badgeTxt').textContent='¡INSIGNIA DE '+ph.name.toUpperCase()+'!'; $('#badgeSub').textContent='Pablo ha superado el Gimnasio '+ph.name+'. ¡Ya está en el medallero!'; ov.classList.remove('hidden'); jingle8([784,988,1175,1568,1175,1568],.11); burst(50); renderMedallero(phase);
+function badgeAnim(phase){ react('ilusionado',3000,true); const ph=PHASES.find(p=>p.id===phase); const ov=$('#badgeOv'); $('#badgeBig').innerHTML=badgeSVG(phase); $('#badgeTxt').textContent='¡INSIGNIA DE '+ph.name.toUpperCase()+'!'; $('#badgeSub').textContent=phase==='dibujo'?'¡Pablo ha completado el Templo del Dibujo y toda la aventura!':'Pablo ha superado el Gimnasio '+ph.name+'. ¡Ya está en el medallero!'; ov.classList.remove('hidden'); jingle8([784,988,1175,1568,1175,1568],.11); burst(50); renderMedallero(phase);
   $('#badgeOk').onclick=()=>{ ov.classList.add('hidden'); if(phase==='dibujo') showEnd(); else if(dibujoUnlocked()&&!G().templeShown){ const g=G(); g.templeShown=true; saveG(g); templeUnlocked(); } }; }
-function showEnd(){ const ov=$('#endScreen'); ov.classList.remove('hidden'); Music.play('final'); react('victoria',0,true); burst(120); setTimeout(()=>burst(80),1200); $('#endOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); }; }
-function templeUnlocked(){ const ov=$('#templeOv'); if(!ov) return; ov.classList.remove('hidden'); react('victoria',0,true); Music.play('victoria'); burst(90); $('#templeOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); }; }
+function showEnd(){ const ov=$('#endScreen'); ov.classList.remove('hidden'); Music.play('final'); burst(120); setTimeout(()=>burst(80),1200); $('#endOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); react('despidiendose',4000,true); setTimeout(()=>react('enamorado',5000),4200); }; }
+function templeUnlocked(){ const ov=$('#templeOv'); if(!ov) return; ov.classList.remove('hidden'); react('entusiasmado',0,true); Music.play('victoria'); burst(90); $('#templeOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); }; }
 /* --- combate: lanzar la bola --- */
 // interior épico del gimnasio para el combate: fondo del diseño + suelo en perspectiva + antorchas/focos, con píxel fino
 function drawArena(cv,design){ const W=cv.clientWidth||1280,H=cv.clientHeight||700; cv.width=W; cv.height=H; const c=cv.getContext('2d'); const hz=Math.round(H*.55);
@@ -1491,18 +1512,18 @@ function roar(){ const c=ac(); if(!c)return; const t=c.currentTime; const m=sfxb
   const vib=c.createOscillator(),vg=c.createGain(); vib.frequency.value=28; vg.gain.value=180; vib.connect(vg); vib.start(t); vib.stop(t+1.1);
   const len=Math.floor(c.sampleRate*.9); const b=c.createBuffer(1,len,c.sampleRate); const d=b.getChannelData(0); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.5); const s=c.createBufferSource(); s.buffer=b; const f2=c.createBiquadFilter(); f2.type='highpass'; f2.frequency.value=2500; const g2=c.createGain(); g2.gain.setValueAtTime(.14,t); g2.gain.exponentialRampToValueAtTime(.0001,t+.9); s.connect(f2); f2.connect(g2); g2.connect(m); s.start(t);
   const sub=c.createOscillator(),sg=c.createGain(); sub.type='square'; sub.frequency.setValueAtTime(70,t); sub.frequency.exponentialRampToValueAtTime(40,t+.8); sg.gain.setValueAtTime(.12,t); sg.gain.exponentialRampToValueAtTime(.0001,t+.8); sub.connect(sg); sg.connect(m); sub.start(t); sub.stop(t+.85); }
-function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.name:'Legendario').toUpperCase(); const ov=$('#battle'); ov.classList.remove('hidden'); const mon=$('#bMon'), ball=$('#bBall'), txt=$('#bTxt'), btns=$('#bBtns'); mon.className='bmon'; ball.style.display='none'; ball.className='ball'; const BALLIMG={fly:'frontal',open:'abierta',luz:'luz',wob:'temblando',got:'completada',fx:'efecto',close:'cerrandose'}; const setBall=(cls)=>{ ball.className='ball '+cls; $('#bBallImg').src='assets/ball/'+(BALLIMG[cls]||'frontal')+'.png'; };
+function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.name:'Legendario').toUpperCase(); const ov=$('#battle'); ov.classList.remove('hidden'); window.__battleBiome=pk?pk.biome:'pueblo'; $('#react').classList.add('inbattle'); react('serio',0); const mon=$('#bMon'), ball=$('#bBall'), txt=$('#bTxt'), btns=$('#bBtns'); mon.className='bmon'; ball.style.display='none'; ball.className='ball'; const BALLIMG={fly:'frontal',open:'abierta',luz:'luz',wob:'temblando',got:'completada',fx:'efecto',close:'cerrandose'}; const setBall=(cls)=>{ ball.className='ball '+cls; $('#bBallImg').src='assets/ball/'+(BALLIMG[cls]||'frontal')+'.png'; };
   applyTheme(phase); drawArena($('#arenaBg'),gymDesignFor(phase)); setTimeout(()=>{ if(ov.classList.contains('hidden'))return; roar(); mon.classList.add('shake'); document.body.classList.add('quake'); setTimeout(()=>{ mon.classList.remove('shake'); document.body.classList.remove('quake'); },700); },1150); 
   $('#bMonImg').src=pk?('assets/boss/'+pk.id+'_png.png'):'';
   $('#bName').textContent=name; Music.play('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },1900);
   const p=pr0.p;
-    $('#bThrow').onclick=()=>{ btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('captura',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
+    $('#bThrow').onclick=()=>{ btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
     const x0=ar.width*.24, y0=ar.height*.22, x1=mr.left-ar.left+mr.width/2-32, y1=ar.height-(mr.top-ar.top+mr.height)-10; const t0=performance.now();
-    const fly=now=>{ const t=Math.min(1,(now-t0)/700); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); },150); setTimeout(()=>{ setBall('close'); blip(500,.1); react('observa',0); },950); setTimeout(()=>{ setBall('fly'); },1250); setTimeout(()=>wobbles(0),1500); } }; requestAnimationFrame(fly);
+    const fly=now=>{ const t=Math.min(1,(now-t0)/700); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); },150); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); },950); setTimeout(()=>{ setBall('fly'); },1250); setTimeout(()=>wobbles(0),1500); } }; requestAnimationFrame(fly);
     const wobbles=n=>{ if(n>=3){ decide(); return; } ball.classList.remove('wob'); void ball.offsetWidth; setBall('wob'); blip(440,.08,'triangle'); txt.textContent='…'+'.'.repeat(n+1); setTimeout(()=>wobbles(n+1),750); };
-    const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('capturado',0,true); setTimeout(()=>react('victoria',0,true),1800); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
-      else { ball.style.display='none'; react('derrota',0,true); Music.play('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; jingle8([330,262,196],.14,'sawtooth'); }
-      btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ ov.classList.add('hidden'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; }; }; }
+    const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
+      else { ball.style.display='none'; react(rpick(['derrota','enojado','molesto','llorando','sufriendo']),0,true); setTimeout(()=>react('triste',0),3000); Music.play('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; jingle8([330,262,196],.14,'sawtooth'); }
+      btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; }; }; }
 /* --- colección --- */
 $('#btnCaught').onclick=()=>{ const c=getCaught(); const grid=$('#collGrid'); grid.innerHTML=c.length?'':'<div class="pf" style="color:#fff;font-size:12px;grid-column:1/-1">Todavía no hay ninguno. ¡A por ellos!</div>';
   c.slice().reverse().forEach(it=>{ const d=document.createElement('div'); d.className='ci'; const cn=document.createElement('img'); cn.src=it.img||''; d.appendChild(cn); const n=document.createElement('div'); n.className='cn'; n.textContent=it.name; d.appendChild(n); grid.appendChild(d); });
@@ -1519,7 +1540,7 @@ const CFG_FIELDS=[
   ['teoBars','Teoría: número de compases (4, 8 o 12)','number'],['teoMaxDeg','Teoría: nota más aguda','deg'],['teoEighths','Teoría: incluir corcheas','bool'],
 ];
 function renderAdmin(){ const pl=$('#pokelist'); pl.innerHTML=''; $('#pkCount').textContent=`${POKEDEX.length} imágenes`;
-  POKEDEX.forEach(p=>{ const d=document.createElement('div'); d.className='pk'; d.innerHTML=`<img src="${p.img}" alt=""><input value="${p.name.replace(/"/g,'&quot;')}"><div class="sw">${(p.colors||[]).map(c=>`<i style="background:${c}"></i>`).join('')}</div><button>Borrar</button>`;
+  [].forEach(p=>{ const d=document.createElement('div'); d.className='pk'; d.innerHTML=`<img src="${p.img}" alt=""><input value="${p.name.replace(/"/g,'&quot;')}"><div class="sw">${(p.colors||[]).map(c=>`<i style="background:${c}"></i>`).join('')}</div><button>Borrar</button>`;
     d.querySelector('input').onchange=e=>{ p.name=e.target.value; if(p.base){ const nm=loadJSON('pec_names',{}); nm[p.id]=p.name; saveJSON('pec_names',nm); } else savePokedex(); };
     d.querySelector('button').onclick=()=>{ if(confirm('¿Quitar '+p.name+' de la rotación?')){ if(p.base){ const h=loadJSON('pec_hidden',[]); h.push(p.id); saveJSON('pec_hidden',h); } POKEDEX=POKEDEX.filter(q=>q!==p); savePokedex(); reshuffleToday(); renderAdmin(); } }; pl.appendChild(d); });
   const f=$('#cfgForm'); f.innerHTML=''; CFG_FIELDS.forEach(([k,lbl,type])=>{ const l=document.createElement('label'); l.textContent=lbl; let inp;
@@ -1532,13 +1553,16 @@ $('#importIn').onchange=e=>{ const fr=new FileReader(); fr.onload=()=>{ try{ con
 const drop=$('#drop'); ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add('over'); })); ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop',e=>addImages([...e.dataTransfer.files]));
 $('#btnExport').onclick=()=>{ const a=document.createElement('a'); a.download='pokedex-pablo.json'; a.href=URL.createObjectURL(new Blob([JSON.stringify({extra:POKEDEX.filter(p=>!p.base),names:loadJSON('pec_names',{}),hidden:loadJSON('pec_hidden',[])})],{type:'application/json'})); a.click(); };
-$('#btnReshuffle').onclick=()=>{ reshuffleToday(true); toast('¡Pokémon nuevos!'); };
+$('#btnReshuffle').onclick=()=>{ reshuffleToday(true); toast('¡Biomas nuevos!'); };
 $('#btnCfgSave').onclick=()=>{ $$('#cfgForm [data-k]').forEach(i=>{ const k=i.dataset.k; CFG[k]=+i.value; }); saveJSON('pec_cfg',CFG); toast('Guardado'); };
 $('#btnCfgReset').onclick=()=>{ CFG=Object.assign({},CFG_DEFAULT); saveJSON('pec_cfg',CFG); renderAdmin(); toast('Valores por defecto'); };
 $('#btnProgReset').onclick=()=>{ localStorage.removeItem('pec_prog'); toast('Progreso borrado'); };
+$('#btnRestart').onclick=()=>{ if(!confirm('¿Reiniciar la partida? Se borran las insignias, las capturas y la posición de Pablo.')) return; ['pec_prog','pec_caught'].forEach(k=>localStorage.removeItem(k)); reshuffleToday(true); renderMedallero(); $('#caughtN').textContent='0'; toast('Partida reiniciada'); Music.stop(); show('mapa'); $('#titleScreen').classList.remove('hidden'); Music.play('opening'); };
 
 function toggleFull(){ const d=document.documentElement; const fs=document.fullscreenElement||document.webkitFullscreenElement; if(fs){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); } else { const f=d.requestFullscreen||d.webkitRequestFullscreen; if(f) f.call(d).catch&&f.call(d).catch(()=>{}); else toast('Usa "Añadir a pantalla de inicio" en el iPad',true); } }
 $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
+// iPad: si cambia el viewport (barra de Safari, rotación, pantalla completa, teclado) se recoloca todo y nunca queda una franja negra
+(function(){ const fix=()=>{ window.scrollTo(0,0); document.documentElement.style.height=window.innerHeight+'px'; document.body.style.height=window.innerHeight+'px'; if(window.visualViewport){ document.body.style.height=Math.round(window.visualViewport.height)+'px'; } }; fix(); ['resize','orientationchange','pageshow','focus'].forEach(ev=>window.addEventListener(ev,()=>{ fix(); setTimeout(fix,300); })); if(window.visualViewport) window.visualViewport.addEventListener('resize',()=>{ fix(); setTimeout(fix,300); }); document.addEventListener('touchmove',e=>{ if(e.touches.length>1) e.preventDefault(); },{passive:false}); })();
 // atajo discreto del profe: mantener pulsado ~0,8 s el lápiz lleva directo a Dibujo (un toque suelto no hace nada)
 { const b=$('#btnDrawNow'); b.addEventListener('click',e=>{ e.preventDefault(); ac(); show('dibujo'); }); } // botón discreto ✎: abre directamente la pizarra de dibujo
 /* ---------------- portada ---------------- */
@@ -1554,7 +1578,7 @@ $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
   tryIntro(); setTimeout(tryIntro,600); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tryIntro(); });
   ['pointerdown','touchstart','touchend','keydown','click'].forEach(ev=>document.addEventListener(ev,()=>{ const el=Music.el(); if(!el||el.paused) introMusic(); },{capture:true,passive:true}));
   $('#tGear').onclick=()=>{ ac(); $('#titleScreen').classList.add('hidden'); renderAdmin(); show('admin'); };
-  $('#btnStart').onclick=()=>{ ac(); loadPiano(); $('#titleScreen').classList.add('hidden'); jingle8([523,659,784,1047],.09); if(current==='mapa'){ Music.play('paseo'); window.__mapDirty&&window.__mapDirty(); } };
+  $('#btnStart').onclick=()=>{ ac(); loadPiano(); $('#titleScreen').classList.add('hidden'); jingle8([523,659,784,1047],.09); if(current==='mapa'){ Music.play('paseo'); window.__mapDirty&&window.__mapDirty(); } setTimeout(()=>react('saludando',3000),400); };
 })();
 /* ---------------- arranque ---------------- */
 pickToday(); show('mapa');
