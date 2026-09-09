@@ -257,10 +257,10 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 
 .tGear{position:absolute;left:78.5%;top:88.5%;width:6%;height:8%;background:transparent;border:0;cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 0 0 6px rgba(255,220,60,.55),0 0 30px rgba(255,220,60,.6)}}
-#react{position:fixed;right:18px;bottom:8px;z-index:150;width:min(264px,28vw);aspect-ratio:1;padding:5%;box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
+#react{position:fixed;right:18px;bottom:8px;z-index:150;--rs:min(264px,26vw);width:var(--rs);height:var(--rs);padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
 #react.hidden{display:none}
-#react img{width:100%;height:100%;display:block;object-fit:cover;object-position:50% 8%;border-radius:10px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
-#react.big{width:min(300px,32vw);bottom:96px}
+#react img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+#react.big{--rs:min(300px,32vw);bottom:96px}
 #react.onmap{bottom:22px}
 @keyframes rpop{from{transform:scale(.3) rotate(-8deg);opacity:0}}
 @keyframes rshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -1346,7 +1346,7 @@ MODULES.mapa=(()=>{
     if(withPablo){ const walking=(vel.x||vel.y)||(route&&route.length); const fr=walking?1+Math.floor(walkT*7)%4:0; drawPablo8(c,pos.x,pos.y,fr); }
     c.restore(); }
   // ---- lógica ----
-  function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
+  function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
   function musicFor(){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen); }
   function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
   function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=150*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
@@ -1395,12 +1395,15 @@ MODULES.mapa=(()=>{
     const v=c.createRadialGradient(W/2,H*.45,H*.35,W/2,H*.45,H*.95); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,.55)'); c.fillStyle=v; c.fillRect(0,0,W,H); }
   function onArrive(){ const s=SC[screen]; if(s.interior){ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('sorpresa',2500,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
     if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<40){ face='up'; const ph=screen==='dibujo'?'dibujo':phaseOfBiome(screen); if(ph){ atGym=ph; showPrompt(ph); } } } }
-  function checkZones(){ const s=SC[screen];
-    if(screen==='pueblo'){ for(const d of DIRS){ const [ex,ey]=P(...s.exits[d]); if(Math.hypot(pos.x-ex,pos.y-ey)<70){ const ph=EXIT[d]; const b=TODAY_BIOMES[ph]; if(!b) return; const ent=P(...SC[b].entry); startTrans(d,b,ent,()=>{ if(autoGoal===ph){ const [dx,dy]=P(...SC[b].door); route=bfs(SC[b],[pos.x,pos.y],[dx,dy]); } }); return; } }
+  function snapWalk(s,x,y){ if(walkable(s,x,y)) return [x,y]; for(let r=6;r<=90;r+=6){ for(let a=0;a<12;a++){ const t=a/12*Math.PI*2; const nx=x+Math.cos(t)*r, ny=y+Math.sin(t)*r; if(walkable(s,nx,ny)) return [nx,ny]; } } return [x,y]; }
+  let zoneArmed=true; // tras un cambio de pantalla, las zonas de salida no cuentan hasta que Pablo sale de ellas (evita el ping-pong)
+  function inExitZone(){ const s=SC[screen]; if(screen==='pueblo'){ return DIRS.some(d=>{ const [ex,ey]=P(...s.exits[d]); return Math.hypot(pos.x-ex,pos.y-ey)<70; }); } if(s.interior||screen==='dibujo'||!s.entry) return false; const [ex,ey]=P(...s.entry); return pos.y>ey-45&&Math.abs(pos.x-ex)<70; }
+  function checkZones(){ const s=SC[screen]; if(!zoneArmed){ if(!inExitZone()) zoneArmed=true; }
+    if(screen==='pueblo'){ if(zoneArmed) for(const d of DIRS){ const [ex,ey]=P(...s.exits[d]); if(Math.hypot(pos.x-ex,pos.y-ey)<70){ const ph=EXIT[d]; const b=TODAY_BIOMES[ph]; if(!b) return; const [ex2,ey2]=P(...SC[b].entry); startTrans(d,b,snapWalk(SC[b],ex2,ey2-70),()=>{ if(autoGoal===ph){ const [dx,dy]=P(...SC[b].door); route=bfs(SC[b],[pos.x,pos.y],[dx,dy]); } }); return; } }
       // portal encendido: teletransporte al templo
       const [px,py]=P(...s.pad); if((dibujoUnlocked()||forceTemple)&&Math.hypot(pos.x-px,pos.y-py)<30) teleport(); }
     else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<30&&bossState&&!bossState.shown) onArrive(); } }
-    else { const [ex,ey]=P(...s.entry); if(screen!=='dibujo'&&pos.y>ey-45&&Math.abs(pos.x-ex)<70){ const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===screen)||'S'; const back={N:'S',S:'N',E:'W',W:'E'}[d]; const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,40],S:[0,-40],E:[-40,0],W:[40,0]}[d]; startTrans(back,'pueblo',[bx+inward[0],by+inward[1]]); }
+    else { if(zoneArmed&&inExitZone()){ const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===screen)||'S'; const back={N:'S',S:'N',E:'W',W:'E'}[d]; const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,110],S:[0,-110],E:[-110,0],W:[110,0]}[d]; startTrans(back,'pueblo',snapWalk(SC.pueblo,bx+inward[0],by+inward[1])); return; }
       doorCheck(); } }
   function doorCheck(){ const s=SC[screen]; if(!s||s.interior||!s.door||busy) return; const [dx,dy]=P(...s.door); const d=Math.hypot(pos.x-dx,pos.y-dy); if(d<44&&!atGym) onArrive(); else if(atGym&&atGym!=='__boss'&&d>80) hidePrompt(); }
   function teleport(){ if(busy) return; busy=true; vel={x:0,y:0}; route=null; react('sorpresa',2000,true); jingle8([880,1320,1760,2640],.08); const fl=$('#flash'); fl.classList.add('on'); setTimeout(()=>{ setScreen('dibujo',P(...SC.dibujo.entry),'up'); busy=false; fl.classList.remove('on'); },700); }
@@ -1441,7 +1444,7 @@ MODULES.mapa=(()=>{
   window.addEventListener('keyup',e=>{ if(KEYS[e.code]){ held.delete(e.code); keyVel(); } });
   $('#btnAuto').onclick=()=>{ ac(); goAuto(); };
   $('#btnEnter').onclick=()=>{ ac(); if(atGym) enterGym(atGym); };
-  $('#mapCv').addEventListener('pointerdown',e=>{ if(busy)return; const r=cv.getBoundingClientRect(); const mx=(e.clientX-r.left+camX)/Z, my=(e.clientY-r.top+camY)/Z; const s=SC[screen]; ac(); if(atGym==='__boss') return; hidePrompt(); autoGoal=null; route=bfs(s,[pos.x,pos.y],[mx,my])||null; if(route){ blip(1000,.04,'square',.05); const end=route[route.length-1]; FX.tap={x:end[0],y:end[1],t:performance.now()}; } });
+  $('#mapCv').addEventListener('pointerdown',e=>{ if(busy)return; const r=cv.getBoundingClientRect(); const mx=(e.clientX-r.left+camX)/Z, my=(e.clientY-r.top+camY)/Z; const s=SC[screen]; ac(); if(atGym==='__boss') return; hidePrompt(); autoGoal=null; route=bfs(s,[pos.x,pos.y],[mx,my])||null; if(route&&route.length){ blip(1000,.04,'square',.05); const end=route[route.length-1]; FX.tap={x:end[0],y:end[1],t:performance.now()}; } else route=null; });
   return {start,stop,goTemple,interior,musicFor};
 })();
 
