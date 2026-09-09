@@ -1,1 +1,0 @@
-window.POKEDEX_BASE=[{"id": "p01.jpg", "name": "Test p01.jpg", "file": "pokemon/p01.jpg", "colors": ["#142878", "#c8e6ff"]}, {"id": "p02.jpg", "name": "Test p02.jpg", "file": "pokemon/p02.jpg", "colors": ["#96141e", "#ffc83c"]}, {"id": "p03.jpg", "name": "Test p03.jpg", "file": "pokemon/p03.jpg", "colors": ["#145a28", "#b4ff96"]}];
