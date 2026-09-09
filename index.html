@@ -595,9 +595,9 @@ const CFG_DEFAULT={
   ritmoBpm:56, ritmoRounds:4, ritmoScrollRounds:2,
   audRounds:6, audMaxDeg:4, audFirstDo:1, audNoteSec:1.8,
   entRounds:6, entMaxDeg:4, entNoteSec:2.4, entHelp:0,
-  teoBars:12, teoMaxDeg:7, teoEighths:1,
+  teoBars:8, teoMaxDeg:7, teoEighths:1,
 };
-let CFG=Object.assign({},CFG_DEFAULT,loadJSON('pec_cfg',{})); if(CFG.ritmoBpm===72||CFG.ritmoBpm===64) CFG.ritmoBpm=56; if(CFG.teoBars===8) CFG.teoBars=12; if(CFG.entRounds===4) CFG.entRounds=6; if(CFG.audNoteSec===0.9) CFG.audNoteSec=1.8;
+let CFG=Object.assign({},CFG_DEFAULT,loadJSON('pec_cfg',{})); if(CFG.ritmoBpm===72||CFG.ritmoBpm===64) CFG.ritmoBpm=56; if(CFG.teoBars===12) CFG.teoBars=8; if(CFG.entRounds===4) CFG.entRounds=6; if(CFG.audNoteSec===0.9) CFG.audNoteSec=1.8;
 function loadJSON(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function saveJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1252,12 +1252,12 @@ MODULES.mapa=(()=>{
     magia:{img:'magia',w:36,entry:[761,1002],sign:[650,930],door:[312,243],paths:[[[768, 1020], [768, 911], [790, 867], [834, 845], [900, 834], [965, 834], [1042, 823], [1108, 801], [1163, 768], [1196, 713], [1207, 669], [1196, 614], [1163, 570], [1141, 548], [1086, 581], [987, 592], [900, 581], [856, 570], [790, 548], [713, 538], [658, 527], [614, 516], [614, 494], [570, 461], [516, 439], [472, 417], [439, 384], [378, 378], [346, 351], [324, 318], [313, 291]],[[1141, 548], [1108, 527], [1075, 483], [1031, 461], [965, 450]]]},
     roca:{img:'roca',w:36,entry:[769,1002],sign:[640,900],door:[1139,190],paths:[[[770,1024],[770,905],[770,860],[800,838],[860,830],[950,820],[1040,790],[1120,770],[1170,730],[1180,680],[1165,640],[1120,610],[1080,590],[1070,540],[1070,490],[1085,440],[1105,395],[1125,345],[1140,300],[1140,245]],[[1070,490],[1000,470],[900,465],[800,430],[700,380],[620,340],[590,320],[650,280],[710,265],[765,250],[800,215],[830,180],[870,145],[920,135]],[[770,860],[770,800],[760,745],[720,705],[670,685],[620,660],[575,615],[530,570],[480,548],[440,535],[455,480],[510,430],[560,380],[590,330]],[[575,615],[520,640],[460,655],[400,660]]]},
     desierto:{img:'desierto',w:36,entry:[750,1004],sign:[630,900],door:[763,186],paths:[[[750,1024],[750,900],[760,840],[790,800],[830,770],[880,740],[930,715],[970,690],[980,650],[985,600],[980,540],[975,470],[965,400],[960,350],[940,315],[890,300],[840,285],[800,265],[775,245],[770,200]],[[960,380],[900,400],[840,410],[780,440],[735,480],[690,485],[640,468],[590,448],[540,420],[485,400],[430,385],[370,380],[320,375],[270,378],[225,385],[185,400]],[[880,740],[950,765],[1030,785],[1100,790],[1170,775],[1230,750],[1290,735]]]},
-    int_hielo:{img:'int_hielo',w:44,interior:'hielo',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_fuego:{img:'int_fuego',w:44,interior:'fuego',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_pantano:{img:'int_pantano',w:44,interior:'pantano',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_magia:{img:'int_magia',w:44,interior:'magia',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_roca:{img:'int_roca',w:44,interior:'roca',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
-    int_desierto:{img:'int_desierto',w:44,interior:'desierto',entry:[768,990],door:[768,335],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_hielo:{img:'int_hielo',w:44,interior:'hielo',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_fuego:{img:'int_fuego',w:44,interior:'fuego',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_pantano:{img:'int_pantano',w:44,interior:'pantano',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_magia:{img:'int_magia',w:44,interior:'magia',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_roca:{img:'int_roca',w:44,interior:'roca',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
+    int_desierto:{img:'int_desierto',w:44,interior:'desierto',entry:[768,990],door:[768,318],podium:[768,178],paths:[[[768,1010],[768,240]]]},
     dibujo:{img:'dibujo',w:34,entry:[783,995],sign:null,door:[773,242],paths:[[[770,870],[770,830],[775,790],[790,740],[830,690],[870,640],[900,600],[920,560],[920,510],[900,470],[850,430],[800,390],[775,340],[775,290],[775,250]],[[790,740],[720,760],[650,750],[590,745],[540,715],[480,690],[450,640],[430,590],[410,545],[380,510],[330,495],[270,470]]]}
   };
   Object.values(SC).forEach(s=>{ s.P=s.paths.map(pl=>pl.map(p=>P(p[0],p[1]))); s.R=(s.rects||[]).map(r=>[r[0]*K,r[1]*K,r[2]*K,r[3]*K]); s.W=s.w*K; });
@@ -1415,7 +1415,7 @@ MODULES.mapa=(()=>{
     c.restore();
     // viñeta
     const v=c.createRadialGradient(W/2,H*.45,H*.35,W/2,H*.45,H*.95); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,.55)'); c.fillStyle=v; c.fillRect(0,0,W,H); }
-  function onArrive(){ const s=SC[screen]; if(s.interior){ const [ddx,ddy]=P(...s.door); if(Math.hypot(pos.x-ddx,pos.y-ddy)>40) return; /* el jefe solo aparece al llegar a las escaleras */ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('asustado',2200,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); setTimeout(()=>react('decidido',0),2300); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
+  function onArrive(){ const s=SC[screen]; if(s.interior){ const [ddx,ddy]=P(...s.door); if(Math.hypot(pos.x-ddx,pos.y-ddy)>16) return; /* el jefe solo aparece al llegar a las escaleras */ if(bossState&&!bossState.shown){ bossState.shown=true; bossState.t0=performance.now()/1000; face='up'; blip(1200,.25,'sine',.12); setTimeout(()=>{ roar(); document.body.classList.add('quake'); react('asustado',2200,true); setTimeout(()=>{ document.body.classList.remove('quake'); },700); setTimeout(()=>react('decidido',0),2300); },500); setTimeout(()=>{ const pr=$('#gymPrompt'); pr.classList.remove('hidden'); const pk=TODAY[bossState.phase]; const pr0=probOf(bossState.pct,bossState.stars); $('#gymPromptTxt').innerHTML=`${(pk?pk.name:'LÍDER').toUpperCase()}<br><small>Captura: ${pr0.pct}% (${pr0.t})</small>`; $('#btnEnter').textContent='¡CAPTÚRALO!'; atGym='__boss'; },1900); } return; }
     if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<40){ face='up'; const ph=screen==='dibujo'?'dibujo':phaseOfBiome(screen); if(ph){ atGym=ph; showPrompt(ph); } } } }
   function snapWalk(s,x,y){ if(walkable(s,x,y)) return [x,y]; for(let r=6;r<=90;r+=6){ for(let a=0;a<12;a++){ const t=a/12*Math.PI*2; const nx=x+Math.cos(t)*r, ny=y+Math.sin(t)*r; if(walkable(s,nx,ny)) return [nx,ny]; } } return [x,y]; }
   let zoneArmed=true; // tras un cambio de pantalla, las zonas de salida no cuentan hasta que Pablo sale de ellas (evita el ping-pong)
@@ -1424,7 +1424,7 @@ MODULES.mapa=(()=>{
     if(screen==='pueblo'){ if(zoneArmed) for(const d of DIRS){ const [ex,ey]=P(...s.exits[d]); if(Math.hypot(pos.x-ex,pos.y-ey)<70){ const ph=EXIT[d]; const b=TODAY_BIOMES[ph]; if(!b) return; const [ex2,ey2]=P(...SC[b].entry); startTrans(d,b,snapWalk(SC[b],ex2,ey2-70),()=>{ if(autoGoal===ph){ const [dx,dy]=P(...SC[b].door); route=bfs(SC[b],[pos.x,pos.y],[dx,dy]); } }); return; } }
       // portal encendido: teletransporte al templo
       const [px,py]=P(...s.pad); if((dibujoUnlocked()||forceTemple)&&Math.hypot(pos.x-px,pos.y-py)<30) teleport(); }
-    else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<30&&bossState&&!bossState.shown) onArrive(); } }
+    else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(Math.hypot(pos.x-dx,pos.y-dy)<14&&bossState&&!bossState.shown) onArrive(); } }
     else { if(zoneArmed&&inExitZone()){ const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===screen)||'S'; const back={N:'S',S:'N',E:'W',W:'E'}[d]; const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,110],S:[0,-110],E:[-110,0],W:[110,0]}[d]; startTrans(back,'pueblo',snapWalk(SC.pueblo,bx+inward[0],by+inward[1])); return; }
       doorCheck(); } }
   function doorCheck(){ const s=SC[screen]; if(!s||s.interior||!s.door||busy) return; const [dx,dy]=P(...s.door); const d=Math.hypot(pos.x-dx,pos.y-dy); if(d<44&&!atGym) onArrive(); else if(atGym&&atGym!=='__boss'&&d>80) hidePrompt(); }
@@ -1540,7 +1540,7 @@ const CFG_FIELDS=[
   ['ritmoBpm','Ritmo: tempo (pulsos por minuto)','number'],['ritmoRounds','Ritmo: rondas del minijuego','number'],
   ['audRounds','Audición: rondas','number'],['audMaxDeg','Audición: nota más aguda','deg'],['audFirstDo','Audición: la primera nota siempre es Do','bool'],['audNoteSec','Audición: segundos por nota','number'],
   ['entRounds','Entonación: rondas','number'],['entMaxDeg','Entonación: nota más aguda','deg'],['entNoteSec','Entonación: segundos por nota','number'],
-  ['teoBars','Teoría: número de compases (4, 8 o 12)','number'],['teoMaxDeg','Teoría: nota más aguda','deg'],['teoEighths','Teoría: incluir corcheas','bool'],
+  ['teoBars','Teoría: número de compases (4 u 8)','number'],['teoMaxDeg','Teoría: nota más aguda','deg'],['teoEighths','Teoría: incluir corcheas','bool'],
 ];
 function renderAdmin(){ const pl=$('#pokelist'); pl.innerHTML=''; $('#pkCount').textContent=`${POKEDEX.length} imágenes`;
   [].forEach(p=>{ const d=document.createElement('div'); d.className='pk'; d.innerHTML=`<img src="${p.img}" alt=""><input value="${p.name.replace(/"/g,'&quot;')}"><div class="sw">${(p.colors||[]).map(c=>`<i style="background:${c}"></i>`).join('')}</div><button>Borrar</button>`;
