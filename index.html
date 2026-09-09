@@ -248,8 +248,7 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 .pixbtn.big{font-size:24px;padding:24px 48px}
 #titleScreen{position:fixed;inset:0;z-index:200;background:#0b2a8a url(assets/title_bg.jpg) center/cover;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #titleScreen::before{content:"";position:absolute;inset:-40px;background:url(assets/title_bg.jpg) center/cover;filter:blur(18px) brightness(.55)}
-.tArt{position:relative;height:100%;aspect-ratio:4/3;max-width:100%;max-height:100%}
-@media (max-aspect-ratio:4/3){.tArt{height:auto;width:100%}}
+.tArt{position:relative;flex:0 0 auto;width:max(100vw,calc(100vh*4/3));height:max(100vh,calc(100vw*3/4));aspect-ratio:auto} /* cubre toda la pantalla recortando lo mínimo por arriba/abajo o por los lados */
 .tArt img{width:100%;height:100%;display:block;object-fit:cover;animation:tfade 1.4s ease-out}
 @keyframes tkb{from{transform:scale(1)}to{transform:scale(1.06)}}
 @keyframes tfade{from{opacity:0;filter:brightness(3)}to{opacity:1;filter:brightness(1)}}
@@ -258,11 +257,11 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 
 .tGear{position:absolute;left:78.5%;top:88.5%;width:6%;height:8%;background:transparent;border:0;cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 0 0 6px rgba(255,220,60,.55),0 0 30px rgba(255,220,60,.6)}}
-#react{position:fixed;right:12px;bottom:8px;z-index:150;width:clamp(78px,9vw,104px);border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
+#react{position:fixed;right:18px;bottom:8px;z-index:150;width:min(264px,28vw);aspect-ratio:1;padding:5%;box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
 #react.hidden{display:none}
-#react img{width:100%;display:block;aspect-ratio:1/1.05;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
-#react.big{width:clamp(170px,24vw,280px);bottom:96px}
-#react.onmap{bottom:100px}
+#react img{width:100%;height:100%;display:block;object-fit:cover;object-position:50% 8%;border-radius:10px;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+#react.big{width:min(300px,32vw);bottom:96px}
+#react.onmap{bottom:22px}
 @keyframes rpop{from{transform:scale(.3) rotate(-8deg);opacity:0}}
 @keyframes rshake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 #react.shake{animation:rshake .3s 2}
@@ -523,7 +522,7 @@ main{position:relative}
     <button class="tGear" id="tGear" aria-label="Ajustes"></button>
   </div>
 </div>
-<div id="endScreen" class="hidden"><div class="tArt eArt" style="aspect-ratio:4/3"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn big eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
+<div id="endScreen" class="hidden"><div class="tArt eArt"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn big eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
 <div id="react" class="hidden"><img id="reactImg" alt=""></div>
 <div id="flash"></div>
 <div class="ov hidden" id="templeOv"><div class="templeCard"><img src="assets/gym/fachada_dibujo.png" alt=""><div class="pf templeT">¡TEMPLO DEL DIBUJO DESBLOQUEADO!</div><div class="templeS">Pablo tiene las 4 insignias de hoy. El portal del pueblo se ha encendido: ¡súbete y te llevará al Templo del Dibujo!</div><button class="pixbtn big" id="templeOk">¡VAMOS!</button></div></div>
@@ -1247,7 +1246,7 @@ MODULES.mapa=(()=>{
   const phaseOfBiome=b=>GYMS.find(p=>TODAY_BIOMES[p]===b);
   const GYM={}; // compat: GYM[phase].biome
   function syncGym(){ GYMS.forEach(p=>{ GYM[p]={biome:TODAY_BIOMES[p]}; }); GYM.dibujo={biome:'dibujo'}; }
-  let cv,ctx,VW=0,VH=0,Z=1,raf=null,last=0,busy=false,atGym=null,pendingInterior=null; let screen='pueblo', pos={x:0,y:0}, face='down', vel={x:0,y:0}, route=null, walkT=0, trans=null, autoGoal=null, camX=0,camY=0; let forceTemple=false, startFace=null;
+  let cv,ctx,VW=0,VH=0,Z=1,raf=null,last=0,busy=false,atGym=null,pendingInterior=null; let screen='pueblo', pos={x:0,y:0}, face='down', vel={x:0,y:0}, route=null, walkT=0, trans=null, autoGoal=null, camX=0,camY=0; let forceTemple=false, startFace=null, started=false;
   const IMGM=n=>getImg(n.startsWith('int_')?('assets/interiors/'+n.slice(4)+'.jpg'):('assets/maps/'+n+'.jpg')); const SIGN=n=>getImg('assets/signs/'+n+'.png');
   ['pueblo','hielo','fuego','pantano','magia','roca','desierto','dibujo'].forEach(n=>{ IMGM(n); SIGN(n); }); BIOME_IDS.forEach(b=>{ IMGM('int_'+b); getImg('assets/boss/'+BIOMES[b].boss+'_trono.png'); }); SIGN('generico'); PHASES.forEach(p=>getImg(LBL(p.id))); getImg('assets/portal_off.png'); getImg('assets/portal_on.png');
   ['down','up','left','right','downleft','downright','upleft','upright'].forEach(d=>{ for(let i=0;i<5;i++) getImg('assets/pablo8/'+d+'_'+i+'.png'); });
@@ -1421,17 +1420,17 @@ MODULES.mapa=(()=>{
     if(screen===TODAY_BIOMES[nt]){ const [dx,dy]=P(...s.door); route=bfs(s,[pos.x,pos.y],[dx,dy]); }
     else if(screen==='pueblo'){ const d=DIRS.find(k=>EXIT[k]===nt); const [ex,ey]=P(...s.exits[d]); route=bfs(s,[pos.x,pos.y],[ex,ey]); }
     else { const [ex,ey]=P(...s.entry); route=bfs(s,[pos.x,pos.y],[ex,ey+10]); } }
-  function start(){ cv=$('#mapCv'); ctx=cv.getContext('2d'); assignExits(); syncGym(); size(); const g=G(); busy=false; trans=null;
+  function start(){ cv=$('#mapCv'); ctx=cv.getContext('2d'); assignExits(); syncGym(); size(); const g=G(); busy=false; trans=null; started=true;
     if(g.screen&&SC[g.screen]&&SC[g.screen].interior&&!pendingInterior){ const b=SC[g.screen].interior; const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===b); g.screen='pueblo'; if(d){ const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,50],S:[0,-50],E:[-50,0],W:[50,0]}[d]; g.pos={x:bx+inward[0],y:by+inward[1]}; startFace={N:'down',S:'up',E:'left',W:'right'}[d]; } else g.pos=null; saveG(g); }
     if(pendingInterior){ const pi=pendingInterior; pendingInterior=null; screen='int_'+pi.biome; pos={x:SC[screen].entry[0],y:SC[screen].entry[1]}; face='up'; bossState={phase:pi.phase,stars:pi.stars,pct:pi.pct,shown:false}; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; route=null; hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step); Music.play('accion'); react('decidido',0); $('#btnAuto').textContent='🚶 Avanzar hacia el líder'; window.addEventListener('resize',size); return; }
     bossState=null; bossSceneHide();
-    if(g.screen&&SC[g.screen]&&g.pos&&(maskOk(SC[g.screen].img,g.pos.x,g.pos.y)!==false)&&(g.screen==='pueblo'||g.screen==='dibujo'||phaseOfBiome(g.screen))){ screen=g.screen; pos={x:g.pos.x,y:g.pos.y}; if(startFace){ face=startFace; startFace=null; } } else { screen='pueblo'; pos={x:SC.pueblo.exits.S[0]*K,y:(SC.pueblo.exits.S[1]-30)*K}; face='up'; }
+    if(g.screen&&SC[g.screen]&&g.pos&&g.pos.x>20&&g.pos.y>20&&g.pos.x<MW-20&&g.pos.y<MH-20&&(maskOk(SC[g.screen].img,g.pos.x,g.pos.y)!==false)&&(g.screen==='pueblo'||g.screen==='dibujo'||phaseOfBiome(g.screen))){ screen=g.screen; pos={x:g.pos.x,y:g.pos.y}; if(startFace){ face=startFace; startFace=null; } } else { screen='pueblo'; pos={x:765,y:590}; face='down'; } // por defecto: en la plaza, junto a la fuente
     const cm=camFor(pos); camX=cm.x; camY=cm.y; renderMedallero(); hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step);
     const nt=nextTarget(); $('#btnAuto').textContent=nt==='dibujo'?(screen==='dibujo'?'✨ Ir al Templo':dibujoUnlocked()||forceTemple?'✨ Ir al portal':'🚶 Volver al pueblo'):'🚶 Ir a Gimnasio '+PHASES.find(p=>p.id===nt).name;
     musicFor();
     if(g.newMedal){ const m=g.newMedal; g.newMedal=null; saveG(g); setTimeout(()=>badgeAnim(m),400); }
     window.addEventListener('resize',size); }
-  function stop(){ if(raf)cancelAnimationFrame(raf); raf=null; window.removeEventListener('resize',size); const g=G(); g.pos=pos; g.screen=screen; saveG(g); }
+  function stop(){ if(raf)cancelAnimationFrame(raf); raf=null; window.removeEventListener('resize',size); if(started&&pos.x>0&&pos.y>0){ const g=G(); g.pos=pos; g.screen=screen; saveG(g); } }
   function interior(phase,stars,pct){ pendingInterior={phase,stars,pct,biome:TODAY_BIOMES[phase]}; show('mapa'); }
   function goTemple(){ forceTemple=true; if(current!=='mapa'){ show('mapa'); } setTimeout(()=>{ if(screen!=='dibujo'){ busy=false; teleport(); } },50); }
   // joystick 8 direcciones y teclado
@@ -1538,7 +1537,7 @@ $('#btnProgReset').onclick=()=>{ localStorage.removeItem('pec_prog'); toast('Pro
 function toggleFull(){ const d=document.documentElement; const fs=document.fullscreenElement||document.webkitFullscreenElement; if(fs){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); } else { const f=d.requestFullscreen||d.webkitRequestFullscreen; if(f) f.call(d).catch&&f.call(d).catch(()=>{}); else toast('Usa "Añadir a pantalla de inicio" en el iPad',true); } }
 $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
 // atajo discreto del profe: mantener pulsado ~0,8 s el lápiz lleva directo a Dibujo (un toque suelto no hace nada)
-{ const b=$('#btnDrawNow'); let tm=null; const arm=e=>{ e.preventDefault(); b.classList.add('arming'); tm=setTimeout(()=>{ b.classList.remove('arming'); ac(); MODULES.mapa.goTemple(); },800); }; const dis=()=>{ clearTimeout(tm); b.classList.remove('arming'); }; b.addEventListener('pointerdown',arm); b.addEventListener('pointerup',dis); b.addEventListener('pointerleave',dis); b.addEventListener('pointercancel',dis); b.onclick=e=>e.preventDefault(); }
+{ const b=$('#btnDrawNow'); b.addEventListener('click',e=>{ e.preventDefault(); ac(); show('dibujo'); }); } // botón discreto ✎: abre directamente la pizarra de dibujo
 /* ---------------- portada ---------------- */
 (function(){ const cv=$('#titleSea'); let raf=null; function draw(t){ const W=cv.width=cv.clientWidth, H=cv.height=cv.clientHeight; const c=cv.getContext('2d'); const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2a7fd6'); g.addColorStop(1,'#0b2a8a'); c.fillStyle=g; c.fillRect(0,0,W,H);
     const tw=getImg('assets/tex/water'+(Math.floor(t/140)%4)+'.png'); if(tw){ c.save(); c.globalAlpha=.45; const pat=c.createPattern(tw,'repeat'); c.scale(1.6,1.6); c.translate(-(t/60)%256,0); c.fillStyle=pat; c.fillRect(0,0,W/1.6+512,H/1.6); c.restore(); }
