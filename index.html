@@ -277,6 +277,7 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 #flash.on{opacity:1}
 .templeCard{background:#0d1b38;border:6px solid #7fa3e6;border-radius:22px;padding:18px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;width:min(640px,92vw);box-shadow:0 0 60px rgba(120,180,255,.5),10px 10px 0 #000;animation:dexin .5s cubic-bezier(.2,1.4,.4,1)}
 .templeCard img{width:min(60vw,420px);max-height:38vh;object-fit:contain;filter:drop-shadow(0 0 24px rgba(140,200,255,.9))}
+.clefBig{font-size:clamp(70px,14vw,140px);line-height:1;color:#fff;text-shadow:4px 4px 0 #000;font-family:'Noto Music','Bravura',serif}
 .templeT{font-size:clamp(14px,2vw,22px);color:#ffcb05;text-shadow:3px 3px 0 #000;text-align:center}
 .templeS{color:#dfe9ff;font-size:15px;text-align:center}
 #titleScreen.hidden{display:none}
@@ -848,9 +849,9 @@ $('#btnAdminBack').onclick=()=>show('mapa');
 function drawSystem(div,bars,opt){ opt=opt||{}; div.innerHTML=''; const S=opt.scale||1; const PW=Math.max(300,div.clientWidth-8), H=opt.height||150; const W=PW/S; const {Renderer,Stave,StaveNote,Voice,Formatter,Beam,Annotation}=VF;
   const renderer=new Renderer(div,Renderer.Backends.SVG); renderer.resize(PW,H); const ctx=renderer.getContext(); ctx.scale(S,S); ctx.setFont('Nunito',16,'bold');
   const first=opt.first!==false; const clefW=first?80:0; const bw=(W-10-clefW)/bars.length; let x=5; const out=[];
-  bars.forEach((bar,i)=>{ const w=bw+(i===0?clefW:0); const st=new Stave(x,opt.top==null?20:opt.top,w); if(i===0&&first){ st.addClef('treble'); if(opt.showTime!==false) st.addTimeSignature(opt.time||'2/4'); }
+  bars.forEach((bar,i)=>{ const w=bw+(i===0?clefW:0); const st=new Stave(x,opt.top==null?20:opt.top,w); const CLEF=opt.clef||'treble'; if(i===0&&first){ st.addClef(CLEF); if(opt.showTime!==false) st.addTimeSignature(opt.time||'2/4'); }
     if(i===bars.length-1&&opt.end) st.setEndBarType(VF.Barline.type.END); st.setContext(ctx).draw();
-    const notes=bar.notes.map(n=>{ const sn=new StaveNote({keys:[n.hidden?'b/4':VEXKEYS[n.deg]],duration:n.dur,auto_stem:true});
+    const notes=bar.notes.map(n=>{ const sn=new StaveNote({keys:[n.hidden?(CLEF==='alto'?'c/4':'b/4'):VEXKEYS[n.deg]],duration:n.dur,auto_stem:true,clef:CLEF});
       if(n.hidden){ sn.setStyle({fillStyle:'transparent',strokeStyle:'transparent'}); } else if(n.color){ sn.setStyle({fillStyle:n.color,strokeStyle:n.color}); }
       if(n.text){ const a=new Annotation(n.text); a.setFont('Nunito',opt.annSize||20,'900'); a.setVerticalJustification(Annotation.VerticalJustify.BOTTOM); if(n.textColor){ a.setStyle({fillStyle:n.textColor,strokeStyle:n.textColor}); } sn.addModifier(a,0); }
       return sn; });
@@ -868,20 +869,28 @@ function genDegrees(n,maxDeg,startDeg){ const out=[startDeg==null?0:startDeg]; w
 /* ============================================================
    TEORÍA — nombres de las notas con botones
    ============================================================ */
+/* Aviso de cambio a clave de Do en 3ª (viola): tarjeta con botón ENTENDIDO; onOk se llama al cerrarla */
+function clefWarnCard(onOk){ const ov=document.createElement('div'); ov.className='ov'; ov.id='clefOv'; ov.innerHTML=`<div class="templeCard" style="width:min(560px,92vw)"><div class="pf" style="font-size:clamp(18px,3vw,30px);color:#ffcb05;text-shadow:3px 3px 0 #000">¡CUIDADO!</div><div class="paper" id="clefDemo" style="width:min(420px,80vw);padding:6px 10px"></div><div class="templeT" style="font-size:clamp(14px,2.2vw,22px)">Ahora en CLAVE DE DO EN 3ª</div><div class="templeS">Es la clave de la viola: el Do está en la línea del medio.</div><button class="pixbtn big" id="clefOk">ENTENDIDO</button></div>`; document.body.appendChild(ov);
+  try{ drawSystem(ov.querySelector('#clefDemo'),[{notes:[{deg:0,dur:'w',text:'Do',textColor:'#e53935',color:'#e53935'}]}],{clef:'alto',height:110,scale:1.15,top:12,showTime:false,end:true,annSize:22,noBeam:true}); }catch(e){}
+  blip(660,.12,'square',.1); setTimeout(()=>blip(880,.12,'square',.1),140); ov.querySelector('#clefOk').onclick=()=>{ ov.remove(); if(onOk) onOk(); }; }
 MODULES.teoria=(()=>{ const root=$('#teoria'); let mel=[],cur=0,errs=0,streak=0,sysDivs=[],done=false;
   function gen(){ const bars=CFG.teoBars|0||8; const notes=[]; let deg=0;
     for(let b=0;b<bars;b++){ const last=b===bars-1; const pat=last?['h']:(CFG.teoEighths?pick([['q','q'],['q','q'],['8','8','q'],['q','8','8'],['8','8','8','8']]):['q','q']);
       const degs=last?[0]:genDegrees(pat.length,CFG.teoMaxDeg|0,null); // per-bar walk from last deg
       pat.forEach((d,i)=>{ if(!last){ const mx=CFG.teoMaxDeg|0; let nd=deg; for(let k=0;k<12&&nd===deg;k++){ const st=pick([-1,1,-1,1,-1,1,-1,1,-2,2,-2,2,-3,3,-4,4,-5]); const c=deg+st; if(c>=0&&c<=mx) nd=c; } if(nd===deg) nd=deg===0?Math.min(mx,2):0; if(b===0&&i===0) nd=0; deg=nd; } else deg=0; notes.push({deg,dur:d,bar:b}); }); }
+    // la primera nota del segundo pentagrama (compás 5) es Do: ahí cambia a clave de Do en 3ª
+    { const first5=notes.find(n=>n.bar===4); if(first5) first5.deg=0; }
     // la penúltima nota que lleve a Do (Re o Si→Do)
     const pen=notes[notes.length-2]; if(pen&&pen.deg!==1) pen.deg=(CFG.teoMaxDeg|0)>=6&&Math.random()<.4?6:pick([1,4]);
     return notes; }
-  let ans=[],corrected=false;
+  let ans=[],corrected=false,clefLock=false;
+  function clefWarn(){ clefLock=true; clefWarnCard(()=>{ clefLock=false; }); }
+  // la tarjeta de aviso está en clefWarnCard (global)
   function render(){ const bars=CFG.teoBars|0||8; const per=4; sysDivs.forEach((div,si)=>{ const slice=[]; for(let b=si*per;b<Math.min(bars,(si+1)*per);b++) slice.push({notes:mel.filter(n=>n.bar===b).map(n=>{ const idx=mel.indexOf(n);
       const answered=idx<cur, isCur=idx===cur&&!corrected; const ok=corrected?ans[idx]===NOTE_NAMES[n.deg]:null;
       return {deg:n.deg,dur:n.dur,color:corrected?(ok?'#1faa59':'#d63a4a'):(isCur?'#16132b':(answered?'#16132b':'#b8b8c8')),
         text:answered?ans[idx]:(isCur?'▲':''),textColor:corrected?(ok?'#1faa59':'#d63a4a'):(answered?(NOTE_COL[ans[idx]]||'#16132b'):'#16132b')}; })});
-      const three=sysDivs.length>=3; const sh=window.innerHeight<820?(three?112:130):(three?140:165); const sc=window.innerHeight<820?(three?.8:.9):(three?.92:1.05); drawSystem(div,slice,{height:sh,scale:sc,top:10,first:true,showTime:si===0,end:si===sysDivs.length-1,annSize:20}); }); $('#hStars').innerHTML=`${Math.min(cur,mel.length)}/${mel.length}`; }
+      const three=sysDivs.length>=3; const sh=window.innerHeight<820?(three?112:130):(three?140:165); const sc=window.innerHeight<820?(three?.8:.9):(three?.92:1.05); drawSystem(div,slice,{height:sh,scale:sc,top:10,first:true,showTime:si===0,end:si===sysDivs.length-1,annSize:20,clef:si===1?'alto':'treble'}); }); $('#hStars').innerHTML=`${Math.min(cur,mel.length)}/${mel.length}`; }
   function start(){ mel=gen(); cur=0; errs=0; streak=0; done=false; ans=[]; corrected=false; const nSys=Math.ceil((CFG.teoBars|0||8)/4);
     root.innerHTML=`<div class="teoTools"><button class="bigbtn sec small" style="font-size:16px;padding:7px 12px" id="teoPlay">🔊 Escuchar</button><button class="bigbtn sec small" style="font-size:16px;padding:7px 12px" id="teoUndo">↶ Borrar última</button></div>
       <div class="paper" id="teoPaper">${Array.from({length:nSys},(_,i)=>`<div class="sys" id="teoSys${i}"></div>`).join('')}<button class="pixbtn hidden" id="teoCheck">✔ CORREGIR</button></div>
@@ -893,7 +902,7 @@ MODULES.teoria=(()=>{ const root=$('#teoria'); let mel=[],cur=0,errs=0,streak=0,
     $('#teoUndo').onclick=()=>{ if(corrected||cur===0)return; cur--; ans.pop(); render(); };
     $('#teoCheck').onclick=()=>{ if(corrected)return; corrected=true; done=true; const ok=mel.filter((n,i)=>ans[i]===NOTE_NAMES[n.deg]).length; errs=mel.length-ok; render(); $('#teoCheck').classList.add('hidden'); $('#teoUndo').classList.add('hidden'); toast(`${ok} de ${mel.length} bien`); setTimeout(finish,1600); };
     setTimeout(render,30); }
-  function answer(nm,btn,deg){ if(done||corrected||cur>=mel.length)return; ac(); const n=mel[cur]; piano(ac().currentTime,DEG_MIDI[deg==null?NOTE_NAMES.indexOf(nm):deg],.5,.9); ans[cur]=nm; cur++; render(); if(cur>=mel.length){ $('#teoCheck').classList.remove('hidden'); toast('¡Pulsa CORREGIR!'); } }
+  function answer(nm,btn,deg){ if(done||corrected||cur>=mel.length||clefLock)return; ac(); const n=mel[cur]; piano(ac().currentTime,DEG_MIDI[deg==null?NOTE_NAMES.indexOf(nm):deg],.5,.9); ans[cur]=nm; cur++; render(); if(cur<mel.length&&mel[cur].bar===4&&mel[cur-1].bar===3) clefWarn(); if(cur>=mel.length){ $('#teoCheck').classList.remove('hidden'); toast('¡Pulsa CORREGIR!'); } }
   function finish(){ const ok=mel.length-errs; const pct=Math.round(100*ok/mel.length); const stars=pctStars(pct); setStars('teoria',stars,pct); fanfare(); burst(50);
     gymResult(root,'teoria',stars,`${ok} de ${mel.length} notas bien · ${errs?errs+' fallos':'sin fallos'}`,start,pct); }
   return {start,stop(){ }};
@@ -1018,12 +1027,13 @@ function noteButtons(container,maxDeg,onPick){ container.innerHTML=''; for(let i
 
 MODULES.audicion=(()=>{ const root=$('#audicion'); let r=0,notes=[],ans=[],cur=1,errs=0,rounds=6,lock=false,timers=[],marks=null;
   const T=(f,ms)=>timers.push(setTimeout(f,ms)); const clear=()=>{timers.forEach(clearTimeout);timers=[];};
+  const altoNow=()=>r>=Math.ceil(rounds/2);
   function render(){ // se dibuja lo que Pablo ha escrito (ans); al corregir, verde/rojo y la nota correcta si falló
     drawSystem($('#audStaff'),[{notes:notes.map((d,i)=>{ const written=i<cur; const shown=marks?d:(written?ans[i]:d); const ok=marks?marks[i]:null;
-      return {deg:shown,dur:'q',hidden:!written&&!marks,color:marks?(ok?'#1faa59':'#d63a4a'):(written?'#16132b':null),text:marks?(ok?NOTE_NAMES[d]:NOTE_NAMES[ans[i]]+'→'+NOTE_NAMES[d]):(written?NOTE_NAMES[ans[i]]:(i===cur?'?':'')),textColor:marks?(ok?'#1faa59':'#d63a4a'):(written?(NOTE_COL[NOTE_NAMES[ans[i]]]||'#16132b'):'#3b6cd6')}; })}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true});
+      return {deg:shown,dur:'q',hidden:!written&&!marks,color:marks?(ok?'#1faa59':'#d63a4a'):(written?'#16132b':null),text:marks?(ok?NOTE_NAMES[d]:NOTE_NAMES[ans[i]]+'→'+NOTE_NAMES[d]):(written?NOTE_NAMES[ans[i]]:(i===cur?'?':'')),textColor:marks?(ok?'#1faa59':'#d63a4a'):(written?(NOTE_COL[NOTE_NAMES[ans[i]]]||'#16132b'):'#3b6cd6')}; })}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true,clef:altoNow()?'alto':'treble'});
     $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
   function play(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=CFG.audNoteSec||.9; notes.forEach((d,i)=>{ piano(t0+i*step,DEG_MIDI[d],step*1.1,1.3); T(()=>{ const el=$('#audStaff'); el.style.boxShadow=`0 0 0 6px var(--acc)`; T(()=>el.style.boxShadow='',step*400); },(t0+i*step-c.currentTime)*1000); }); }
-  function next(){ if(r>=rounds){ finish(); return; } lock=false; marks=null; ans=[]; notes=genRoundNotes(CFG.audMaxDeg|0,CFG.audFirstDo); cur=0; render(); T(play,600); }
+  function next(){ if(r>=rounds){ finish(); return; } lock=false; marks=null; ans=[]; notes=genRoundNotes(CFG.audMaxDeg|0,CFG.audFirstDo); cur=0; render(); if(r===Math.ceil(rounds/2)){ lock=true; clefWarnCard(()=>{ lock=false; T(play,400); }); } else T(play,600); }
   function onPick(deg,btn){ if(lock||cur>=4)return; ac(); piano(ac().currentTime,DEG_MIDI[deg],.7,1.2); ans[cur]=deg; cur++; render();
     if(cur>=4){ lock=true; marks=notes.map((d,i)=>ans[i]===d); const bad=marks.filter(m=>!m).length; errs+=bad; T(()=>{ render(); if(bad===0){ sfxOk(); toast(pick(['¡Bien!','¡Crack!','¡Eso es!'])); } else { sfxBad(); toast(bad===1?'1 fallo':bad+' fallos',true); } r++; $('#audBar').style.width=(100*r/rounds)+'%'; T(next,bad?2600:1200); },350); } }
   function finish(){ const total=rounds*4; const pct=Math.round(100*Math.max(0,total-errs)/total); const stars=pctStars(pct); setStars('audicion',stars,pct); fanfare(); burst(50);
@@ -1062,11 +1072,11 @@ function freqToName(freq){ const mf=69+12*Math.log2(freq/440); const m=Math.roun
 MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4,timers=[],raf=null,results=[],roundScores=[],positions=[],singing=false,silent=0;
   const T=(f,ms)=>timers.push(setTimeout(f,ms)); const clear=()=>{ timers.forEach(clearTimeout); timers=[]; if(raf)cancelAnimationFrame(raf); raf=null; singing=false; };
   function colorFor(res){ if(!res||res.best==null)return '#16132b'; return res.best<=PCFG.centsPerfect?'#1faa59':res.best<=PCFG.centsNear?'#e69a00':'#d63a4a'; }
-  function render(){ positions=drawSystem($('#entStaff'),[{notes:notes.map((d,i)=>({deg:d,dur:'q',color:colorFor(results[i]),text:NOTE_NAMES[d],textColor:NOTE_COL[NOTE_NAMES[d]]}))}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true});
+  function render(){ positions=drawSystem($('#entStaff'),[{notes:notes.map((d,i)=>({deg:d,dur:'q',color:colorFor(results[i]),text:NOTE_NAMES[d],textColor:NOTE_COL[NOTE_NAMES[d]]}))}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true,clef:r>=Math.ceil(rounds/2)?'alto':'treble'});
     $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
   function playRef(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=Math.min(1.1,CFG.entNoteSec||1); notes.forEach((d,i)=>piano(t0+i*step,DEG_MIDI[d],step*1.1,1.3)); }
   let retry=false;
-  function next(){ if(r>=rounds){ finish(); return; } if(!retry){ notes=genRoundNotes(CFG.entMaxDeg|0,1); } results=[]; render(); $('#entMsg').textContent=retry?'Otra vez: escucha…':'Escucha…'; $('#entCursor').style.display='none'; T(playRef,500); const step=Math.min(1.1,CFG.entNoteSec||1); T(sing,500+step*4*1000+600); }
+  function next(){ if(r>=rounds){ finish(); return; } if(!retry){ notes=genRoundNotes(CFG.entMaxDeg|0,1); } results=[]; render(); $('#entMsg').textContent=retry?'Otra vez: escucha…':'Escucha…'; $('#entCursor').style.display='none'; const go=()=>{ T(playRef,500); const step=Math.min(1.1,CFG.entNoteSec||1); T(sing,500+step*4*1000+600); }; if(!retry&&r===Math.ceil(rounds/2)){ clefWarnCard(go); } else go(); }
   async function sing(){ ac(); try{ await initMic(); }catch(e){ $('#entMsg').textContent='No se pudo abrir el micrófono 😕 (permite el micro en el navegador)'; return; }
     results=notes.map(()=>({best:null,frames:0,voiced:0,sum:0,dirSum:0})); render(); let smooth=0;
     const c=ac(); const bs=CFG.entNoteSec||2.4; // sin cuenta atrás: empieza enseguida
