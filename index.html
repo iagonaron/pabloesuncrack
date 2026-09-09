@@ -414,8 +414,8 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 .collGrid .ci{background:rgba(255,255,255,.12);border:3px solid #fff;border-radius:8px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .collGrid img{width:96px;height:96px;object-fit:cover;border-radius:6px}
 .collGrid .cn{font-family:var(--pix);font-size:9px;color:#fff;line-height:1.4}
-.hudLogo{height:74px;filter:drop-shadow(0 4px 0 #000)}
-.hLogo{height:clamp(34px,5.5vh,54px);vertical-align:middle;margin-right:10px}
+.hudLogo{height:84px;border-radius:18px;filter:drop-shadow(0 4px 0 #000)}
+.hLogo{height:clamp(44px,7.5vh,64px);border-radius:12px;vertical-align:middle;margin-right:10px}
 .hLbl{height:clamp(36px,5.5vh,56px);vertical-align:middle;margin-left:10px;filter:drop-shadow(3px 3px 0 var(--accDark))}
 header .titles{display:flex;align-items:center}
 .pcard{background:linear-gradient(160deg,#ffcb05,#f2a900);border:5px solid #111;border-radius:14px;padding:8px;box-shadow:6px 6px 0 #000,0 0 30px var(--acc);display:flex;flex-direction:column;gap:6px;align-items:stretch}
@@ -454,7 +454,7 @@ main{position:relative}
     <button class="home" id="btnHome" title="Inicio">🏠</button>
     <button class="home" id="btnFull2" title="Pantalla completa" style="font-size:24px">⛶</button>
     <div class="titles">
-      <img class="hLogo" src="assets/logo.png" alt="Pablo es un crack"><span class="kicker">EN:</span>
+      <img class="hLogo" src="assets/icon_app.png" alt="Pablo es un crack"><span class="kicker">EN:</span>
       <img class="hLbl hidden" id="hLbl" alt=""><span class="poketitle" id="hTitle">Ritmo</span>
     </div>
     <div class="stars" id="hStars"></div>
@@ -469,7 +469,7 @@ main{position:relative}
       <div class="mapwrap" id="mapWrap">
         <canvas id="mapCv"></canvas>
         <div class="hud">
-          <div class="hudTitle"><img class="hudLogo" src="assets/logo.png" alt="Pablo es un crack"></div>
+          <div class="hudTitle"><img class="hudLogo" src="assets/icon_app.png" alt="Pablo es un crack"></div>
           <button class="rbtn" id="btnCaught" title="Capturados" style="display:none"><span id="caughtN">0</span></button>
           <button class="rbtn" id="btnMute" title="Música"></button>
           <button class="rbtn" id="btnFull" title="Pantalla completa"></button>
@@ -522,7 +522,7 @@ main{position:relative}
   <canvas id="titleSea" class="hidden"></canvas>
   <div class="tArt"><img src="assets/title_bg.jpg" alt="Pablo es un crack"><canvas id="titleFx"></canvas>
     <button class="tStartBtn" id="btnStart" aria-label="Empezar partida"></button>
-    <button class="tGear" id="tGear" aria-label="Ajustes"></button>
+    <button class="tGear" id="tGear" aria-label="Ajustes" style="display:none"></button>
   </div>
 </div>
 <div id="endScreen" class="hidden"><div class="tArt eArt"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn big eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
@@ -635,6 +635,8 @@ const REACT_T={normal:0,decidido:0,pensativo:0,pensativo2:0}; let reactTm=null;
 const RMAP={sorpresa:'sorprendido',observa:'nervioso',captura:'serio',capturado:'victoria',lanza:'entusiasmado',recibe:'ilusionado',usa:'idea',recupera:'contento',subenivel:'ilusionado',orden:'decidido',pensativo2:'pensativo'};
 const RALL=['normal','alegre','contento','sorprendido','entusiasmado','decidido','pensativo','confundido','nervioso','asustado','enojado','triste','decepcionado','avergonzado','cansado','molesto','ilusionado','idea','seguro','saludando','despidiendose','victoria','derrota','llorando','enamorado','serio','sufriendo','rie'];
 let RESULT_MODE=false, REACT_SOFT=false; const PLAY_T0=Date.now();
+// precarga de fondos y caras de las reacciones (para que el cambio sea inmediato)
+setTimeout(()=>{ ['pueblo','hielo','fuego','pantano','magia','roca','desierto','dibujo'].forEach(b=>['ext','int'].forEach(k=>{ const i=new Image(); i.src=`assets/rbg/${b}_${k}.jpg`; })); RALL.forEach(n=>{ const i=new Image(); i.src='assets/react2/'+n+'.png'; }); },1500);
 function rseen(){ return loadJSON('pec_rseen',{}); }
 // elige entre varias caras la que menos veces ha salido (así, a lo largo de la partida, aparecen todas)
 function rpick(list){ const sn=rseen(); let best=list[0],bv=1e9; list.forEach(n=>{ const v=sn[n]||0; if(v<bv||(v===bv&&Math.random()<.5)){ bv=v; best=n; } }); return best; }
@@ -1365,19 +1367,19 @@ MODULES.mapa=(()=>{
     // brillo de la puerta del gimnasio
     if(s.door&&!s.interior){ const [dx,dy]=P(...s.door); const a=.18+.1*Math.sin(t*3); const g=c.createRadialGradient(dx,dy-10,2,dx,dy-10,46); g.addColorStop(0,`rgba(255,240,160,${a})`); g.addColorStop(1,'rgba(255,240,160,0)'); c.fillStyle=g; c.fillRect(dx-50,dy-60,100,100); }
     drawMaterialFx(c,t,s,cx0,cy0,vw,vh); drawLife(c,t,dt,s,cx0,cy0,vw,vh);
-    if(withPablo){ const walking=(vel.x||vel.y)||(route&&route.length); const fr=walking?1+Math.floor(walkT*7)%4:0; drawPablo8(c,pos.x,pos.y,fr); }
+    if(withPablo){ const walking=(vel.x||vel.y)||(route&&route.length); const fr=walking?1+Math.floor(walkT*9)%4:0; drawPablo8(c,pos.x,pos.y,fr); }
     c.restore(); }
   // ---- lógica ----
   function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
   function musicFor(){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen); }
-  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; { const el=$('#react'); el.style.transition='opacity .45s'; el.style.opacity='0'; setTimeout(()=>{ REACT_SOFT=true; react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500); REACT_SOFT=false; el.style.opacity='1'; setTimeout(()=>{ el.style.transition=''; },500); },500); } Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
-  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=150*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
+  function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; { const el=$('#react'); el.style.transition='opacity .45s'; el.style.opacity='0'; setTimeout(()=>{ try{ el.style.backgroundImage=`url("assets/rbg/${toId==='pueblo'?'pueblo':toId}_ext.jpg")`; }catch(e){} },450); setTimeout(()=>{ REACT_SOFT=true; react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500); REACT_SOFT=false; el.style.opacity='1'; setTimeout(()=>{ el.style.transition=''; },500); },500); } Music.play(toId==='pueblo'?'pueblo':toId); blip(520,.08,'triangle',.08); }
+  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=195*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
   let stepAcc=0, stepSide=1;
   function step(now){ if(current!=='mapa') return; { const wrap=$('#mapWrap'); if(wrap&&(wrap.clientWidth!==VW||wrap.clientHeight!==VH)) size(); } const dt=Math.min(.05,(now-(last||now))/1000); last=now; const t=now/1000;
     if(trans){ trans.t+=dt/0.85; if(trans.t>=1){ const tr=trans; trans=null; busy=false; setScreen(tr.to,tr.toPos,tr.to==='pueblo'?(tr.dir==='S'?'down':tr.dir==='N'?'up':tr.dir==='E'?'right':'left'):'up'); if(tr.then) tr.then(); } draw(now,dt); raf=requestAnimationFrame(step); return; }
     if(!busy){ let dx=vel.x,dy=vel.y;
       if(route&&route.length){ const n=route[0]; const ddx=n.x-pos.x, ddy=n.y-pos.y; const d=Math.hypot(ddx,ddy); if(d<6){ route.shift(); if(!route.length){ route=null; onArrive(); } } else { dx=ddx/d; dy=ddy/d; } }
-      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.28){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
+      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.22){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
     if(!trans&&!busy) doorCheck();
     }
     draw(now,dt); raf=requestAnimationFrame(step); }
@@ -1446,7 +1448,7 @@ MODULES.mapa=(()=>{
     else if(screen==='pueblo'){ const d=DIRS.find(k=>EXIT[k]===nt); const [ex,ey]=P(...s.exits[d]); route=bfs(s,[pos.x,pos.y],[ex,ey]); }
     else { const [ex,ey]=P(...s.entry); route=bfs(s,[pos.x,pos.y],[ex,ey+10]); } }
   function start(){ cv=$('#mapCv'); ctx=cv.getContext('2d'); assignExits(); syncGym(); size(); const g=G(); busy=false; trans=null; started=true;
-    if(g.screen&&SC[g.screen]&&SC[g.screen].interior&&!pendingInterior){ const b=SC[g.screen].interior; const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===b); g.screen='pueblo'; if(d){ const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,50],S:[0,-50],E:[-50,0],W:[50,0]}[d]; g.pos={x:bx+inward[0],y:by+inward[1]}; startFace={N:'down',S:'up',E:'left',W:'right'}[d]; } else g.pos=null; saveG(g); }
+    if(g.screen&&SC[g.screen]&&SC[g.screen].interior&&!pendingInterior){ g.screen='pueblo'; g.pos={x:765,y:590}; startFace='down'; zoneArmed=false; saveG(g); } // al salir de un gimnasio, Pablo aparece en la plaza junto a la fuente
     if(pendingInterior){ const pi=pendingInterior; pendingInterior=null; screen='int_'+pi.biome; pos={x:SC[screen].entry[0],y:SC[screen].entry[1]}; face='up'; bossState={phase:pi.phase,stars:pi.stars,pct:pi.pct,shown:false}; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; route=null; hidePrompt(); last=0; if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(step); Music.play('accion'); react('serio',0); $('#btnAuto').textContent='🚶 Avanzar hacia el líder'; window.addEventListener('resize',size); return; }
     bossState=null; bossSceneHide();
     if(g.screen&&SC[g.screen]&&g.pos&&g.pos.x>20&&g.pos.y>20&&g.pos.x<MW-20&&g.pos.y<MH-20&&(maskOk(SC[g.screen].img,g.pos.x,g.pos.y)!==false)&&(g.screen==='pueblo'||g.screen==='dibujo'||phaseOfBiome(g.screen))){ screen=g.screen; pos={x:g.pos.x,y:g.pos.y}; if(startFace){ face=startFace; startFace=null; } } else { screen='pueblo'; pos={x:765,y:590}; face='down'; } // por defecto: en la plaza, junto a la fuente
@@ -1581,18 +1583,20 @@ $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
   tryIntro(); setTimeout(tryIntro,600); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tryIntro(); });
   ['pointerdown','touchstart','touchend','keydown','click'].forEach(ev=>document.addEventListener(ev,()=>{ const el=Music.el(); if(!el||el.paused) introMusic(); },{capture:true,passive:true}));
   /* ---- portada con vida: destellos en el mar, nubes que pasan y el logo flotando ---- */
-  (function(){ const cv=$('#titleFx'); const img=$('.tArt img'); if(!cv||!img) return; const logo=new Image(); logo.src='assets/title_logo.png'; const LB=[0.2714,0.3527,0.4862,0.2247]; // caja del logo en fracción de la imagen
-    let pts=null, clouds=null;
+  (function(){ const cv=$('#titleFx'); const img=$('.tArt img'); if(!cv||!img) return; const logo=new Image(); logo.src='assets/logo.png'; const LB=[0.2721,0.3536,0.4848,0.1989]; // caja del logo en fracción de la imagen
+    let pts=null, clouds=null, birds=null;
     function water(){ const w=181,h=136; const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); x.drawImage(img,0,0,w,h); const d=x.getImageData(0,0,w,h).data; const out=[]; for(let i=0;i<w*h;i++){ const r=d[i*4],g=d[i*4+1],b=d[i*4+2]; const px=i%w, py=(i-px)/w; const fx=px/w, fy=py/h; if(fx>LB[0]-.02&&fx<LB[0]+LB[2]+.02&&fy>LB[1]-.02&&fy<LB[1]+LB[3]+.02) continue; if(b>r+50&&b>160&&g>110&&((px*7+py*13)%9===0)) out.push([fx+Math.random()*.005,fy+Math.random()*.007,Math.random()*6.28,.6+Math.random()]); } return out; }
     function draw(now){ if($('#titleScreen').classList.contains('hidden')){ requestAnimationFrame(draw); return; } const W=cv.clientWidth,H=cv.clientHeight; const dpr=Math.min(2,window.devicePixelRatio||1); if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){ cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); } const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,W,H); const t=now/1000; const iw=img.naturalWidth||1448, ih=img.naturalHeight||1086; const sc=Math.max(W/iw,H/ih); const DW=iw*sc, DH=ih*sc, OX=(W-DW)/2, OY=(H-DH)/2; // rect real de la imagen (object-fit: cover)
       if(!pts&&img.complete&&img.naturalWidth){ try{ pts=water(); }catch(e){ pts=[]; } }
-      if(!clouds) clouds=Array.from({length:7},(_,i)=>({x:Math.random(),y:.04+Math.random()*.22,w:.10+Math.random()*.16,sp:.006+Math.random()*.008,a:.18+Math.random()*.2,ph:i}));
+      if(!clouds){ clouds=Array.from({length:14},(_,i)=>({x:Math.random()*1.3-.15,y:.03+Math.random()*.30,w:.08+Math.random()*.22,sp:.004+Math.random()*.010,a:.14+Math.random()*.22,ph:i})); clouds.sort((p,q)=>p.w-q.w); birds=Array.from({length:4},(_,i)=>({x:Math.random(),y:.06+Math.random()*.25,sp:.02+Math.random()*.015,s:.006+Math.random()*.004,ph:Math.random()*6.28})); }
       // destellos en el mar
       if(pts){ pts.forEach(p=>{ const life=(t*(0.35+p[3]*.3)+p[2])%1; if(life>.18) return; const k=Math.sin(life/.18*Math.PI); const x=OX+p[0]*DW,y=OY+p[1]*DH; c.fillStyle=`rgba(255,255,255,${k*.85})`; c.fillRect(x-1,y-1,2,2); if(k>.7&&p[3]>1.3){ c.fillRect(x-4,y,9,1); c.fillRect(x,y-3,1,7); } }); }
       // nubes suaves que cruzan el cielo
       clouds.forEach(cl=>{ cl.x+=cl.sp/60; if(cl.x>1.2) cl.x=-.25; const x=OX+cl.x*DW,y=OY+cl.y*DH,w=cl.w*DW,h=w*.32; const g=c.createRadialGradient(x,y,0,x,y,w/2); g.addColorStop(0,`rgba(255,255,255,${cl.a})`); g.addColorStop(.6,`rgba(255,255,255,${cl.a*.5})`); g.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle=g; c.beginPath(); c.ellipse(x,y,w/2,h/2,0,0,7); c.fill(); c.beginPath(); c.ellipse(x-w*.22,y+h*.1,w*.28,h*.36,0,0,7); c.fill(); c.beginPath(); c.ellipse(x+w*.2,y+h*.08,w*.3,h*.4,0,0,7); c.fill(); });
-      // logo flotando (tapa al logo fijo de la imagen)
-      if(logo.complete&&logo.naturalWidth){ const lw=LB[2]*DW, lh=lw*logo.naturalHeight/logo.naturalWidth; const lx=OX+LB[0]*DW, ly=OY+LB[1]*DH; const bob=Math.sin(t*1.1)*DH*.005, tilt=Math.sin(t*.7)*.006; c.save(); c.translate(lx+lw/2,ly+lh/2+bob); c.rotate(tilt); c.drawImage(logo,-lw/2,-lh/2,lw,lh); c.restore(); }
+      // pajaritos planeando
+      if(birds) birds.forEach(bd=>{ bd.x+=bd.sp/60; if(bd.x>1.1){ bd.x=-.1; bd.y=.06+Math.random()*.25; } const x=OX+bd.x*DW, y=OY+bd.y*DH+Math.sin(t*1.3+bd.ph)*DH*.004; const sz=bd.s*DW; const flap=Math.sin(t*6+bd.ph)*sz*.5; c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=Math.max(1.2,sz*.18); c.beginPath(); c.moveTo(x-sz,y+flap*.3); c.quadraticCurveTo(x-sz*.5,y-flap,x,y); c.quadraticCurveTo(x+sz*.5,y-flap,x+sz,y+flap*.3); c.stroke(); });
+      // logo flotando
+      if(logo.complete&&logo.naturalWidth){ const lw=DW*.50, lh=lw*logo.naturalHeight/logo.naturalWidth; const lx=OX+DW*.515-lw/2, ly=OY+DH*.43-lh/2; const bob=Math.sin(t*1.1)*DH*.009, tilt=Math.sin(t*.7)*.010; c.save(); c.translate(lx+lw/2,ly+lh/2+bob); c.rotate(tilt); c.shadowColor='rgba(0,0,0,.45)'; c.shadowBlur=18; c.shadowOffsetY=10-bob*.6; c.drawImage(logo,-lw/2,-lh/2,lw,lh); c.restore(); }
       requestAnimationFrame(draw); }
     requestAnimationFrame(draw); })();
   $('#tGear').onclick=()=>{ ac(); $('#titleScreen').classList.add('hidden'); renderAdmin(); show('admin'); };
