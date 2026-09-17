@@ -378,8 +378,8 @@ body.dibmode header{display:none}body.dibmode main{padding:0}
 .dlgBox{position:absolute;left:calc(min(264px,26vw) + 30px);right:calc(min(264px,26vw) + 30px);bottom:22px;
   pointer-events:auto;cursor:pointer;height:min(264px,26vw)}
 #dlg.hidden{display:none}
-.dlgCard{--rs:min(264px,26vw);width:var(--rs);height:var(--rs);flex:0 0 auto;padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;background:#cfe6ff center/cover;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
-.dlgCard img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:opacity .18s}
+.dlgCard{--rs:min(264px,26vw);width:var(--rs);height:var(--rs);flex:0 0 auto;padding:calc(var(--rs)*.04) calc(var(--rs)*.045) calc(var(--rs)*.03);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;background:#cfe6ff center/cover;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
+.dlgCard img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%;transform:scale(1.07);filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:opacity .18s}
 .dlgBox{box-sizing:border-box;background:#fff;border:5px solid #111;border-radius:14px;box-shadow:6px 6px 0 #000;padding:18px 20px;display:flex;align-items:center;animation:dlgin .3s cubic-bezier(.2,1.5,.4,1)}
 @keyframes dlgin{from{transform:translateY(20px) scale(.96);opacity:0}}
 .dlgName{position:absolute;left:14px;top:-16px;background:#ffcb05;border:4px solid #111;border-radius:8px;padding:2px 12px;font-family:var(--pix);font-size:12px;color:#2b1a0c;box-shadow:3px 3px 0 #000}
@@ -1525,7 +1525,7 @@ MODULES.mapa=(()=>{
     for(let i=LIFE.birds.length-1;i>=0;i--){ const bd=LIFE.birds[i]; bd.x+=bd.dir*70*dt; if(bd.x<-200||bd.x>MW+200){ LIFE.birds.splice(i,1); continue; } const fl=Math.sin(t*14+bd.ph); c.strokeStyle='rgba(30,30,50,.85)'; c.lineWidth=2; c.lineCap='round'; c.beginPath(); c.moveTo(bd.x-6,bd.y+fl*3); c.lineTo(bd.x,bd.y); c.lineTo(bd.x+6,bd.y+fl*3); c.stroke(); } }
   /* ---- Celesti en el mapa: levita en 8 direcciones, tintinea la cola y se teletransporta ---- */
   const CEL={on:false,x:0,y:0,dir:'down',f:0,a:0,ph:0,scale:1,tp:-1,follow:false,spark:[],tick:0,fx:[],flash:0};
-  const CELH=56;                       // altura de Celesti en px de mapa
+  const CELH=47;                       // altura de Celesti en px de mapa
   const TPSEQ=['tp0','tp1','tp2','tp4','tp3','tp5'];   // orden del remolino al desvanecerse
   function celImg(){ if(CEL.tp>=0){ const k=Math.max(0,Math.min(TPSEQ.length-1,Math.floor(CEL.tp))); return getImg('assets/celesti2/'+TPSEQ[k]+'.png'); }
     return getImg('assets/celesti2/'+CEL.dir+'_'+(CEL.f|0)+'.png')||getImg('assets/celesti2/down_0.png'); }
