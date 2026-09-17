@@ -166,8 +166,23 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 
 /* dibujo */
 #dibujo .wrap{flex:1;min-height:0;display:flex;gap:12px}
-#dibujo{background:#0d1b38;padding:0;display:flex;align-items:center;justify-content:center}
-.dArt{position:relative;width:min(100%,calc(100vh*1.5));aspect-ratio:3/2;margin:auto;user-select:none}
+#dibujo{background:#0d1b38;padding:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#dibujo::before{content:'';position:absolute;inset:-8%;background:url(assets/interiors/dibujo.jpg) center/cover;filter:blur(22px) brightness(.5) saturate(.8);z-index:0}
+.dArt{z-index:1}
+.dArt{position:relative;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:3/2;margin:auto;user-select:none}
+.dTimer{position:absolute;left:.5%;top:.8%;z-index:6;background:rgba(17,17,17,.82);color:#fff;border:3px solid #ffcb05;border-radius:12px;padding:.5% 1.1%;font-family:var(--pix);font-size:clamp(10px,1.4vw,19px);letter-spacing:.06em;box-shadow:3px 3px 0 rgba(0,0,0,.45)}
+.dTimer.off{opacity:.5}
+.dTimer.low{background:#b3261e;border-color:#fff;animation:tmrp .9s infinite}
+@keyframes tmrp{50%{transform:scale(1.08)}}
+#artOv .artBox{display:flex;flex-direction:column;align-items:center;gap:2vh}
+.artFrame{position:relative;background:#fff;border:10px solid #ffcb05;border-radius:10px;box-shadow:0 0 0 7px #0b1a5a,0 18px 50px rgba(0,0,0,.6);padding:10px;animation:artin .9s cubic-bezier(.2,1.4,.4,1) both}
+.artFrame img{display:block;max-width:72vw;max-height:58vh;width:auto;height:auto;border-radius:3px}
+@keyframes artin{from{transform:scale(.55) rotate(-7deg);opacity:0}}
+.artBadge{position:absolute;right:-5%;bottom:-7%;width:24%;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));animation:artbg .8s cubic-bezier(.2,1.9,.4,1) 1.1s both}
+.artBadge img{width:100%;height:auto;display:block;max-width:none;max-height:none}
+@keyframes artbg{from{transform:scale(0) rotate(-40deg);opacity:0}}
+.artSub{font-family:var(--pix);font-size:clamp(11px,1.6vw,20px);color:#ffcb05;text-shadow:3px 3px 0 #000;animation:artin .6s 1.5s both}
+.dFs{position:absolute;right:.5%;top:.8%;z-index:6;width:4.2%;aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.85);border:2px solid #b8a27a;box-shadow:0 2px 0 #8d7a55;font-size:clamp(12px,1.8vw,22px);display:grid;place-items:center;padding:0;color:#2b1a0c}
 .dArt>img{width:100%;height:100%;display:block;pointer-events:none}
 .dArt .cwrap{position:absolute;left:15.9%;top:15.4%;width:67.6%;height:68%;border-radius:6px;box-shadow:none;background:#fff}
 .dSlots{position:absolute;top:24.6%;width:3.8%;height:46%;display:flex;flex-direction:column;justify-content:space-between}
@@ -221,7 +236,8 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 :root{--pix:"Press Start 2P","Nunito",monospace}
 .pf{font-family:var(--pix);line-height:1.6}
 body.mapmode header{display:none}body.mapmode main{padding:0}
-body.dibmode header{display:none}body.dibmode main{padding:0}
+body.dibmode header{display:none}body.dibmode main{padding:0;overflow:hidden}
+body.dibmode #react,body.dibmode #dlg{display:none!important}   /* en el lienzo no molesta nada: ni reacciones ni cuadros de texto */
 .mapwrap{position:relative;flex:1;min-height:0;background:#1a3d24;overflow:hidden}
 #mapCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
 .hud{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:14px;padding:10px 16px;pointer-events:none}
@@ -289,7 +305,11 @@ body.dibmode header{display:none}body.dibmode main{padding:0}
 .tapIn{display:flex;flex-direction:column;align-items:center;gap:26px;animation:fadein 1s ease-out}
 .tapIn img{width:min(60vw,520px);filter:drop-shadow(0 0 30px rgba(255,203,5,.35))}
 .tapTxt{color:#fff;font-size:clamp(14px,2.2vw,22px);text-shadow:3px 3px 0 #000;animation:pulse2 1.3s infinite}
-#endScreen{position:fixed;inset:0;z-index:210;background:#0b1a3a url(assets/end_bg.jpg) center/cover;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;animation:fadein 1.2s ease-out}
+#endScreen{position:fixed;inset:0;z-index:210;background:#0b1a3a;display:flex;align-items:center;justify-content:center;overflow:hidden;animation:fadein 1.2s ease-out}
+/* contraportada: entera y centrada, pensada para la pantalla del aula (muy ancha y baja); los laterales los rellena la versión desenfocada */
+#endScreen .eArt{width:auto;height:100%;max-width:100%;max-height:100%;aspect-ratio:1447/1087}
+#endScreen .eArt img{object-fit:contain}
+#endScreen .eBtn{font-size:clamp(11px,1.3vw,21px);padding:clamp(8px,1vw,16px) clamp(14px,1.8vw,28px)}
 #endScreen::before{content:"";position:absolute;inset:-40px;background:url(assets/end_bg.jpg) center/cover;filter:blur(18px) brightness(.5)}
 #endScreen.hidden{display:none}
 .eBtn{position:absolute;left:auto;right:2.5%;bottom:2.5%;font-size:12px;padding:10px 18px;transform:none;opacity:0;white-space:nowrap}
@@ -386,7 +406,8 @@ body.dibmode header{display:none}body.dibmode main{padding:0}
 .dlgName.pa{background:#7fd3ff}
 .dlgTxt{color:#111;font-size:clamp(15px,2vw,23px);font-weight:800;line-height:1.38;letter-spacing:.01em;width:100%}
 .dlgTxt b{color:#c2410c}
-.dlgNext{position:absolute;right:14px;bottom:6px;font-size:20px;color:#111;animation:dlgar .8s infinite}
+.dlgNext{position:absolute;right:14px;bottom:6px;font-size:20px;color:#111;animation:dlgar .8s infinite;transition:opacity .25s}
+.dlgBox.wait{cursor:default}.dlgBox.wait .dlgNext{opacity:0}
 @keyframes dlgar{50%{transform:translateY(5px)}}
 body.dlgmode .medallero,body.dlgmode .autoBtn,body.dlgmode .prompt,body.dlgmode .hud{opacity:0;pointer-events:none;transition:opacity .3s}
 /* Celesti acompañante en la pantalla de dibujo */
@@ -559,6 +580,7 @@ main{position:relative}
 <div id="flash"></div>
 <div class="ov hidden" id="templeOv"><div class="templeCard"><img src="assets/gym/fachada_dibujo.png" alt=""><div class="pf templeT">¡TEMPLO DEL DIBUJO DESBLOQUEADO!</div><div class="templeS">Pablo tiene las 4 insignias de hoy. El portal del pueblo se ha encendido: ¡súbete y te llevará al Templo del Dibujo!</div><button class="pixbtn big" id="templeOk">¡VAMOS!</button></div></div>
 <!-- OVERLAYS 8 BITS -->
+<div class="ov hidden" id="artOv"><div class="artBox"><div class="poketitle big">¡OBRA TERMINADA!</div><div class="artFrame"><img id="artImg" alt=""><div class="artBadge" id="artBadge"></div></div><div class="artSub">¡Insignia del Dibujo para Pablo!</div></div></div>
 <div class="ov hidden" id="dexIntro">
   <div class="dexWrap"><img class="dexShell" src="assets/gym/dex_device.png" alt="">
   <div class="dex">
@@ -621,12 +643,12 @@ const PHASES=[
   {id:'dibujo',name:'Dibujo',emoji:'🎨',def:['#c58cff','#ec407a']},
 ];
 const CFG_DEFAULT={
-  ritmoBpm:56, ritmoRounds:4, ritmoScrollRounds:2,
-  audRounds:6, audMaxDeg:4, audFirstDo:1, audNoteSec:1.8,
+  ritmoBpm:56, ritmoRounds:6, ritmoScrollRounds:2,
+  audRounds:8, audMaxDeg:4, audFirstDo:1, audNoteSec:1.8,
   entRounds:6, entMaxDeg:4, entNoteSec:2.4, entHelp:0,
   teoBars:8, teoMaxDeg:7, teoEighths:1,
 };
-let CFG=Object.assign({},CFG_DEFAULT,loadJSON('pec_cfg',{})); if(CFG.ritmoBpm===72||CFG.ritmoBpm===64) CFG.ritmoBpm=56; if(CFG.teoBars===12) CFG.teoBars=8; if(CFG.entRounds===4) CFG.entRounds=6; if(CFG.audNoteSec===0.9) CFG.audNoteSec=1.8;
+let CFG=Object.assign({},CFG_DEFAULT,loadJSON('pec_cfg',{})); if(CFG.ritmoBpm===72||CFG.ritmoBpm===64) CFG.ritmoBpm=56; if(CFG.teoBars===12) CFG.teoBars=8; if(CFG.entRounds===4) CFG.entRounds=6; if(CFG.audNoteSec===0.9) CFG.audNoteSec=1.8; if(CFG.ritmoRounds===4) CFG.ritmoRounds=6; if(CFG.audRounds===6) CFG.audRounds=8;
 function loadJSON(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function saveJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -708,14 +730,18 @@ function celVoice(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); con
   g.gain.setValueAtTime(.19,t); g.gain.exponentialRampToValueAtTime(.0001,t+.105); o.connect(g); g.connect(m); o.start(t); o.stop(t+.12); }
 
 /* --- motor de diálogo (una línea por toque, con voz y reacciones) --- */
-let DLG_ON=false;
+let DLG_ON=false, DLG_END=null;
+function dlgStop(){ if(DLG_END){ const f=DLG_END; DLG_END=null; f(); } }
 function dlgRun(lines,hook){ return new Promise(res=>{
   const ov=$('#dlg'), tx=$('#dlgTxt'), nm=$('#dlgName'), im=$('#dlgCardImg'), card=$('#dlgCard');
   DLG_ON=true; document.body.classList.add('dlgmode'); ov.classList.remove('hidden');
   try{ card.style.backgroundImage=reactBg(); }catch(e){} // mismo fondo que Pablo: el del sitio donde están
-  let i=-1, typing=false, tm=null, full='', autoTm=null;
-  const type=(t)=>{ typing=true; tx.innerHTML=''; let k=0; const step=()=>{ if(!typing) return; k++; tx.innerHTML=t.slice(0,k); if(k%2===0) celVoice(); if(k<t.length){ tm=setTimeout(step,28); } else { typing=false; } }; step(); };
-  const next=()=>{ clearTimeout(autoTm); if(typing){ typing=false; clearTimeout(tm); tx.innerHTML=full; return; }
+  let i=-1, typing=false, tm=null, full='', autoTm=null, okAt=0, wt=null;
+  const box=$('.dlgBox');
+  // ventana mínima antes de poder avanzar: que le dé tiempo a mirar y no lo salte de un dedazo
+  const gate=(ms)=>{ okAt=performance.now()+ms; box.classList.add('wait'); clearTimeout(wt); wt=setTimeout(()=>box.classList.remove('wait'),ms); };
+  const type=(t)=>{ typing=true; tx.innerHTML=''; let k=0; const step=()=>{ if(!typing) return; k++; tx.innerHTML=t.slice(0,k); if(k%2===0) celVoice(); if(k<t.length){ tm=setTimeout(step,32); } else { typing=false; gate(1100); } }; gate(700); step(); };
+  const next=()=>{ clearTimeout(autoTm); if(typing){ typing=false; clearTimeout(tm); tx.innerHTML=full; gate(1100); return; }
     i++; if(i>=lines.length){ end(); return; }
     const L=lines[i]; full=L.t;
     nm.textContent=L.n||'CELESTI'; nm.classList.toggle('pa',!!L.pablo); try{ card.style.backgroundImage=reactBg(); }catch(e){}
@@ -724,9 +750,10 @@ function dlgRun(lines,hook){ return new Promise(res=>{
     if(hook) hook(L,i);
     type(full);
     if(L.auto){ const my=i; autoTm=setTimeout(()=>{ if(i===my&&DLG_ON) next(); }, L.auto+full.length*28); } };
-  const end=()=>{ clearTimeout(autoTm); DLG_ON=false; ov.classList.add('hidden'); document.body.classList.remove('dlgmode'); $('.dlgBox').removeEventListener('pointerdown',tap); window.removeEventListener('keydown',key); res(); };
-  const tap=(e)=>{ e.preventDefault(); ac(); next(); };
-  const key=(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); next(); } };
+  const end=()=>{ clearTimeout(autoTm); clearTimeout(wt); box.classList.remove('wait'); DLG_ON=false; DLG_END=null; ov.classList.add('hidden'); document.body.classList.remove('dlgmode'); $('.dlgBox').removeEventListener('pointerdown',tap); window.removeEventListener('keydown',key); res(); };
+  const tap=(e)=>{ e.preventDefault(); if(performance.now()<okAt){ blip(300,.03,'square',.03); return; } ac(); next(); };
+  const key=(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); if(performance.now()<okAt) return; next(); } };
+  DLG_END=end;
   $('.dlgBox').addEventListener('pointerdown',tap); window.addEventListener('keydown',key);
   next(); }); }
 
@@ -850,7 +877,7 @@ function gymWalk(phase,stars,pct){ RESULT_MODE=false; $('#gymWalk').classList.ad
 
 /* ---------------- navegación ---------------- */
 let current='mapa'; const MODULES={};
-function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); if(id==='dibujo') Music.play('dibujo');
+function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id!=='mapa') dlgStop(); if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); if(id==='dibujo') Music.play('dibujo');
   $$('.screen').forEach(s=>s.hidden=s.id!==id); const ph=PHASES.find(p=>p.id===id); document.body.classList.toggle('mapmode',id==='mapa'); document.body.classList.toggle('dibmode',id==='dibujo');
   if(ph){ applyTheme(id); $('#hTitle').textContent='Gimnasio '+ph.name; $('#hLbl').src=LBL(id); $('#hLbl').classList.remove('hidden'); $('#hTitle').classList.add('hidden'); $('#hStars').innerHTML=''; }
   else { applyTheme(null); $('#hLbl').classList.add('hidden'); $('#hTitle').classList.remove('hidden'); $('#hTitle').textContent=id==='admin'?'Ajustes':'…'; $('#hStars').innerHTML=''; }
@@ -1128,9 +1155,9 @@ MODULES.audicion=(()=>{ const root=$('#audicion'); let r=0,notes=[],ans=[],cur=1
     drawSystem($('#audStaff'),[{notes:notes.map((d,i)=>{ const written=i<cur; const shown=marks?d:(written?ans[i]:d); const ok=marks?marks[i]:null;
       return {deg:shown,dur:'q',hidden:!written&&!marks,color:marks?(ok?'#1faa59':'#d63a4a'):(written?'#16132b':null),text:marks?(ok?NOTE_NAMES[d]:NOTE_NAMES[ans[i]]+'→'+NOTE_NAMES[d]):(written?NOTE_NAMES[ans[i]]:(i===cur?'?':'')),textColor:marks?(ok?'#1faa59':'#d63a4a'):(written?(NOTE_COL[NOTE_NAMES[ans[i]]]||'#16132b'):'#3b6cd6')}; })}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true,clef:altoNow()?'alto':'treble'});
     $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
-  function play(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=CFG.audNoteSec||.9; notes.forEach((d,i)=>{ piano(t0+i*step,DEG_MIDI[d],step*1.1,1.3); T(()=>{ const el=$('#audStaff'); el.style.boxShadow=`0 0 0 6px var(--acc)`; T(()=>el.style.boxShadow='',step*400); },(t0+i*step-c.currentTime)*1000); }); }
+  function play(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=CFG.audNoteSec||.9; notes.forEach((d,i)=>{ piano(t0+i*step,DEG_MIDI[d],step*1.1,2.1); T(()=>{ const el=$('#audStaff'); el.style.boxShadow=`0 0 0 6px var(--acc)`; T(()=>el.style.boxShadow='',step*400); },(t0+i*step-c.currentTime)*1000); }); }
   function next(){ if(r>=rounds){ finish(); return; } lock=false; marks=null; ans=[]; notes=genRoundNotes(CFG.audMaxDeg|0,CFG.audFirstDo); cur=0; render(); if(r===Math.ceil(rounds/2)){ lock=true; clefWarnCard(()=>{ lock=false; T(play,400); }); } else T(play,600); }
-  function onPick(deg,btn){ if(lock||cur>=4)return; ac(); piano(ac().currentTime,DEG_MIDI[deg],.7,1.2); ans[cur]=deg; cur++; render();
+  function onPick(deg,btn){ if(lock||cur>=4)return; ac(); piano(ac().currentTime,DEG_MIDI[deg],.7,1.7); ans[cur]=deg; cur++; render();
     if(cur>=4){ lock=true; marks=notes.map((d,i)=>ans[i]===d); const bad=marks.filter(m=>!m).length; errs+=bad; T(()=>{ render(); if(bad===0){ sfxOk(); toast(pick(['¡Bien!','¡Crack!','¡Eso es!'])); } else { sfxBad(); toast(bad===1?'1 fallo':bad+' fallos',true); } r++; $('#audBar').style.width=(100*r/rounds)+'%'; T(next,bad?2600:1200); },350); } }
   function finish(){ const total=rounds*4; const pct=Math.round(100*Math.max(0,total-errs)/total); const stars=pctStars(pct); setStars('audicion',stars,pct); fanfare(); burst(50);
     gymResult(root,'audicion',stars,`${rounds} rondas · ${errs?errs+' fallos':'sin fallos'} · ${pct}%`,start,pct); }
@@ -1170,7 +1197,7 @@ MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4
   function colorFor(res){ if(!res||res.best==null)return '#16132b'; return res.best<=PCFG.centsPerfect?'#1faa59':res.best<=PCFG.centsNear?'#e69a00':'#d63a4a'; }
   function render(){ positions=drawSystem($('#entStaff'),[{notes:notes.map((d,i)=>({deg:d,dur:'q',color:colorFor(results[i]),text:NOTE_NAMES[d],textColor:NOTE_COL[NOTE_NAMES[d]]}))}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true,clef:r>=Math.ceil(rounds/2)?'alto':'treble'});
     $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
-  function playRef(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=Math.min(1.1,CFG.entNoteSec||1); notes.forEach((d,i)=>piano(t0+i*step,DEG_MIDI[d],step*1.1,1.3)); }
+  function playRef(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=Math.min(1.1,CFG.entNoteSec||1); notes.forEach((d,i)=>piano(t0+i*step,DEG_MIDI[d],step*1.1,2.1)); }
   let retry=false;
   function next(){ if(r>=rounds){ finish(); return; } if(!retry){ notes=genRoundNotes(CFG.entMaxDeg|0,1); } results=[]; render(); $('#entMsg').textContent=retry?'Otra vez: escucha…':'Escucha…'; $('#entCursor').style.display='none'; const go=()=>{ T(playRef,500); const step=Math.min(1.1,CFG.entNoteSec||1); T(sing,500+step*4*1000+600); }; if(!retry&&r===Math.ceil(rounds/2)){ clefWarnCard(go); } else go(); }
   async function sing(){ ac(); try{ await initMic(); }catch(e){ $('#entMsg').textContent='No se pudo abrir el micrófono 😕 (permite el micro en el navegador)'; return; }
@@ -1222,12 +1249,19 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
   const TOOLS=[['pencil','✏️'],['brush','🖌️'],['line','📏'],['rect','⬜'],['circle','⚪'],['tri','🔺'],['star','⭐'],['fill','🪣'],['eraser','🧽']];
   function build(){ root.innerHTML=`<div class="dArt" id="dArt"><img src="assets/interiors/dibujo.jpg" alt="" draggable="false">
       <div class="cwrap" id="dWrap"><canvas id="dCv"></canvas><canvas id="dOv"></canvas></div>
+      <div class="dTimer off" id="dTimer">⏳ 5:00</div><button class="dFs" id="dFs" title="Pantalla completa">⛶</button>
       <div class="dSlots" id="dTools" style="left:11.5%"></div><div class="dSlots" id="dTools2" style="left:84.7%"></div>
       <canvas id="dFx"></canvas><div id="dCelWrap"><div id="dCel"><img id="dCelImg" alt=""></div></div>
       <div class="dFloor"><div class="pal" id="dPal"></div><div class="sizes" id="dSizes"></div><div class="tex" id="dTex"></div><button class="dBig" id="dSave" title="Guardar">💾</button><button class="dBig done" id="dDone" title="Terminado">⭐ ¡Terminado!</button></div></div>`;
     const tl=$('#dTools'), tr=$('#dTools2'); TOOLS.forEach(([id,ic],i)=>{ const b=document.createElement('button'); b.textContent=ic; b.title=id; b.className=id===tool?'on':''; b.onclick=()=>{ tool=id; $$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x===b)); }; (i<6?tl:tr).appendChild(b); });
     [['dUndo','↶','Deshacer'],['dClear','🗑️','Borrar todo'],['dHome','⌂','Volver']].forEach(([id,ic,t])=>{ const b=document.createElement('button'); b.id=id; b.textContent=ic; b.title=t; tr.appendChild(b); });
     $('#dHome').onclick=()=>show('mapa');
+    const fsEl=$('#dFs'); const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+    const dE=document.documentElement;
+    if(!(dE.requestFullscreen||dE.webkitRequestFullscreen)) fsEl.style.display='none';
+    fsEl.onclick=()=>{ try{ if(fsOn()) (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+        else (dE.requestFullscreen||dE.webkitRequestFullscreen).call(dE); }catch(e){}
+      setTimeout(()=>{ fsEl.textContent=fsOn()?'✕':'⛶'; fsEl.title=fsOn()?'Salir de pantalla completa':'Pantalla completa'; fit(); },350); };
     const pal=$('#dPal'); COLORS.forEach(c=>{ const b=document.createElement('button'); b.style.background=c; b.className=c===color?'on':''; b.onclick=()=>{ color=c; $$('#dPal button').forEach(x=>x.classList.toggle('on',x===b)); if(tool==='eraser'){tool='pencil';$$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x.title==='pencil'));} }; pal.appendChild(b); });
     const sz=$('#dSizes'); [2,4,10,20].forEach(s=>{ const b=document.createElement('button'); const ds=Math.round(Math.min(26,3+s*1.1)); b.innerHTML=`<i style="width:${ds}px;height:${ds}px"></i>`; b.className=s===size?'on':''; b.onclick=()=>{ size=s; $$('#dSizes button').forEach(x=>x.classList.toggle('on',x===b)); }; sz.appendChild(b); });
     const tx=$('#dTex'); [['solid','Liso'],['dots','Puntos'],['stripes','Rayas'],['check','Cuadros']].forEach(([id,nm])=>{ const b=document.createElement('button'); b.textContent=nm; b.className=id===tex?'on':''; b.onclick=()=>{ tex=id; $$('#dTex button').forEach(x=>x.classList.toggle('on',x===b)); }; tx.appendChild(b); });
@@ -1236,14 +1270,14 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
       cv.width=ov.width=w; cv.height=ov.height=h; ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); if(old)ctx.drawImage(old,0,0); inited=true; };
     fit(); setTimeout(fit,80); window.addEventListener('resize',fit);
     const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]; };
-    ov.addEventListener('pointerdown',e=>{ e.preventDefault(); ov.setPointerCapture(e.pointerId); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
+    ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); timerStart(); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
       if(tool==='fill'){ floodFill(Math.round(x),Math.round(y)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
     ov.addEventListener('pointermove',e=>{ if(!drawing)return; const [x,y]=pos(e); if(tool==='pencil'||tool==='brush'||tool==='eraser'){ seg(last[0],last[1],x,y); last=[x,y]; } else { octx.clearRect(0,0,ov.width,ov.height); shape(octx,sx,sy,x,y); } });
     const up=e=>{ if(!drawing)return; drawing=false; celStroke(); const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
     ov.addEventListener('pointerup',up); ov.addEventListener('pointercancel',up);
     $('#dUndo').onclick=()=>{ const im=undo.pop(); if(im)ctx.putImageData(im,0,0); }; $('#dClear').onclick=()=>{ snap(); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); };
     $('#dSave').onclick=()=>{ const a=document.createElement('a'); a.download='dibujo-pablo-'+todayKey()+'.png'; a.href=cv.toDataURL('image/png'); a.click(); };
-    $('#dDone').onclick=()=>{ setStars('dibujo',3); fanfare(); burst(60); toast('¡Qué obra de arte!'); setTimeout(()=>show('mapa'),1500); }; }
+    $('#dDone').onclick=()=>finale(); }
   /* ---- Celesti acompañante: mira el lienzo, reacciona y cambia de sitio cada 30 s ---- */
   const CSPOT=[
     {l:0.4, t:34, w:10.6, p:['flota_0','flota_4','mira_a']},
@@ -1319,8 +1353,26 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H; const tc=tmp.getContext('2d'); tc.fillStyle=tex==='solid'?color:pattern(tc); tc.fillRect(0,0,W,H); tc.globalCompositeOperation='destination-in'; tc.drawImage(mk,0,0);
     ctx.drawImage(tmp,0,0); }
   function hex2rgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
-  function start(){ undo=[]; build(); setTimeout(celDibStart,300); }
-  return {start,stop(){ celDibStop(); }};
+  /* ---- 5 minutos de dibujo: la cuenta atrás arranca con el primer trazo ---- */
+  const DUR=300; let tInt=null, tEnd=0, tOn=false, tDone=false, warned={};
+  const fmtT=s=>{ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+  function timerReset(){ clearInterval(tInt); tInt=null; tOn=false; tDone=false; warned={}; const el=$('#dTimer'); if(el){ el.textContent='\u23f3 5:00'; el.classList.add('off'); el.classList.remove('low'); } }
+  function timerStart(){ if(tOn||tDone) return; tOn=true; tEnd=performance.now()+DUR*1000; const el=$('#dTimer'); if(el) el.classList.remove('off');
+    tInt=setInterval(()=>{ const el2=$('#dTimer'); if(!el2||current!=='dibujo'){ return; } const left=(tEnd-performance.now())/1000;
+      el2.textContent='\u23f3 '+fmtT(left); el2.classList.toggle('low',left<=60);
+      if(left<=60&&!warned.m1){ warned.m1=1; blip(880,.18,'triangle',.08); celCheer(); }
+      if(left<=10&&!warned.s10){ warned.s10=1; blip(1200,.2,'square',.08); }
+      if(left<=0){ clearInterval(tInt); tInt=null; finale(); } },250); }
+  /* presentación de la obra: cuadro + insignia + música del final, y a los 5 s la contraportada */
+  function finale(){ if(tDone) return; tDone=true; tOn=false; clearInterval(tInt); tInt=null; celDibStop();
+    const g=G(); g.stars=g.stars||{}; setStars('dibujo',3); const g2=G(); g2.newMedal=null; g2.templeShown=true; saveG(g2);
+    try{ $('#artImg').src=cv.toDataURL('image/png'); }catch(e){}
+    try{ $('#artBadge').innerHTML=badgeSVG('dibujo'); }catch(e){}
+    Music.play('final'); $('#artOv').classList.remove('hidden');
+    burst(90); setTimeout(()=>burst(70),900); setTimeout(()=>burst(60),1800); setTimeout(()=>burst(50),2700);
+    setTimeout(()=>{ $('#artOv').classList.add('hidden'); showEnd(); },5000); }
+  function start(){ undo=[]; build(); timerReset(); setTimeout(celDibStart,300); }
+  return {start,stop(){ celDibStop(); clearInterval(tInt); tInt=null; }};
 })();
 
 /* ============================================================
@@ -1387,13 +1439,13 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   const TRACKS={pueblo:'assets/audio/pueblo.mp3',hielo:'assets/audio/hielo.mp3',fuego:'assets/audio/fuego.mp3',pantano:'assets/audio/pantano.mp3',magia:'assets/audio/magia.mp3',roca:'assets/audio/roca.mp3',desierto:'assets/audio/desierto.mp3',dibujo:'assets/audio/dibujo.mp3',combate:'assets/audio/combate.mp3',accion:'assets/audio/accion.mp3',capturado:'assets/audio/capturado.mp3',entrada:'assets/audio/entrada.mp3',escapa:'assets/audio/escapa.mp3',base:'assets/audio/base.mp3',final:'assets/audio/final.mp3',opening:'assets/audio/opening.mp3'};
   const ONESHOT={capturado:0,entrada:9,escapa:8}; // segundos antes de fundir (0 = entera)
   const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
-  const VOL=.16; let aCur=null,aName=null,fades=[]; // −10 dB respecto a antes
+  const VOL=.16, TVOL={dibujo:.085}; let aCur=null,aName=null,fades=[]; // −10 dB respecto a antes
   function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
   function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__kill=false; fadeTo(old,0,OUT,()=>{ old.pause(); old.src=''; }); }
     const el=new Audio(TRACKS[name]); const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
     const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
     // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
-    el.play().catch(()=>{}); fadeTo(el,VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
+    el.play().catch(()=>{}); fadeTo(el,TVOL[name]||VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
   function stopTrack(ms){ if(aCur){ const old=aCur; fadeTo(old,0,ms||700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
   function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia→pueblo)
@@ -1641,13 +1693,13 @@ MODULES.mapa=(()=>{
   function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
   function musicFor(slow){ if(current!=='mapa') return; Music.play(SC[screen].interior?'accion':screen==='pueblo'?'pueblo':screen,!!slow); }
   function startTrans(dir,toId,toPos,then){ const from=screen; const fromCam={x:camX,y:camY}; const s2=SC[toId]; const toCam=camFor({x:toPos[0],y:toPos[1]}); trans={from,to:toId,dir,t:0,fromCam,toCam,toPos,then}; busy=true; { const el=$('#react'); el.style.transition='opacity .45s'; el.style.opacity='0'; setTimeout(()=>{ try{ el.style.backgroundImage=reactBg(); }catch(e){} },300); setTimeout(()=>{ REACT_SOFT=true; react(toId==='pueblo'?rpick(['normal','contento','seguro']):rpick(['ilusionado','seguro','decidido','entusiasmado']),3500); REACT_SOFT=false; el.style.opacity='1'; setTimeout(()=>{ el.style.transition=''; },500); },500); } Music.play(toId==='pueblo'?'pueblo':toId,true); blip(520,.08,'triangle',.08); }
-  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=195*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
+  function tryMove(dx,dy,dt){ const s=SC[screen]; const sp=176*dt; let nx=pos.x+dx*sp, ny=pos.y+dy*sp; if(s.interior&&s.door){ const lim=P(...s.door)[1]-2; if(ny<lim){ ny=lim; if(pos.y<=lim&&dy<0) return false; } } /* en el interior no se suben las escaleras: se para justo antes */ if(walkable(s,nx,ny)){ pos.x=nx; pos.y=ny; return true; } if(dx&&walkable(s,pos.x+dx*sp,pos.y)){ pos.x+=dx*sp; return true; } if(dy&&walkable(s,pos.x,pos.y+dy*sp)){ pos.y+=dy*sp; return true; } return false; }
   let stepAcc=0, stepSide=1;
   function step(now){ if(current!=='mapa') return; { const wrap=$('#mapWrap'); if(wrap&&(wrap.clientWidth!==VW||wrap.clientHeight!==VH)) size(); } const dt=Math.min(.05,(now-(last||now))/1000); last=now; const t=now/1000;
     if(trans){ trans.t+=dt/0.85; if(trans.t>=1){ const tr=trans; trans=null; busy=false; setScreen(tr.to,tr.toPos,tr.to==='pueblo'?(tr.dir==='S'?'down':tr.dir==='N'?'up':tr.dir==='E'?'right':'left'):'up'); if(tr.then) tr.then(); } draw(now,dt); raf=requestAnimationFrame(step); return; }
     if(!busy){ let dx=vel.x,dy=vel.y;
       if(route&&route.length){ const n=route[0]; const ddx=n.x-pos.x, ddy=n.y-pos.y; const d=Math.hypot(ddx,ddy); if(d<6){ route.shift(); if(!route.length){ route=null; onArrive(); } } else { dx=ddx/d; dy=ddy/d; } }
-      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.22){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
+      if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.245){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
     if(!trans&&!busy) doorCheck();
     celFollow(dt);
     }
@@ -1753,13 +1805,15 @@ function dexIntro(id,go){ react('sorpresa',2500,true); setTimeout(()=>{ blip(220
   const side=$('#dexSide'); side.innerHTML=pk?`<img src="assets/boss/${pk.id}_sprite0.png" class="on" alt="">`:'';
   Music.play('entrada'); const im=$('#dexImg'); im.src=pk?('assets/boss/'+pk.id+'_arte.png'):''; im.style.clipPath='inset(0 0 100% 0)'; im.style.filter='brightness(2.2) saturate(.2)'; let pct=0;
   const tick=()=>{ if(ov.classList.contains('hidden'))return; pct+=3; im.style.clipPath=`inset(0 0 ${Math.max(0,100-pct)}% 0)`; if(pct%12===0)blip(300+pct*8,.03,'square',.05); if(pct<100) setTimeout(tick,45); else { im.style.transition='filter .6s'; im.style.filter='none'; $('#dexScanTxt').textContent='Registro completado ✓'; jingle8([523,659,784,1047],.1);
-      $('#dexNum').textContent='N.º 00'+(BIOME_IDS.indexOf(pk.biome)+1); typeText($('#dexName'),pk?pk.name.toUpperCase():'DESCONOCIDO',()=>{ $('#dexType').textContent=pk.tipo; $('#dexStats').innerHTML=`<span>Altura</span><b>${pk.altura}</b><span>Peso</span><b>${pk.peso}</b>`; $('#dexDesc').textContent=pk.desc; $('#dexGym').innerHTML='LÍDER DE <img src="'+LBL(id)+'" style="height:30px;filter:drop-shadow(2px 2px 0 #000)">'; $('#dexGo').classList.remove('hidden'); }); } }; setTimeout(tick,300);
-  $('#dexGo').onclick=()=>{ ov.classList.add('hidden'); Music.stop(true); go(); }; }
+      try{ $('#dexNum').textContent='N.º 00'+(pk?BIOME_IDS.indexOf(pk.biome)+1:0); }catch(e){} typeText($('#dexName'),pk?pk.name.toUpperCase():'DESCONOCIDO',()=>{ try{ if(pk){ $('#dexType').textContent=pk.tipo; $('#dexStats').innerHTML='<span>Altura</span><b>'+pk.altura+'</b><span>Peso</span><b>'+pk.peso+'</b>'; $('#dexDesc').textContent=pk.desc; } $('#dexGym').innerHTML='LÍDER DE <img src="'+LBL(id)+'" style="height:30px;filter:drop-shadow(2px 2px 0 #000)">'; }catch(e){} $('#dexGo').classList.remove('hidden'); }); } }; setTimeout(tick,300);
+  $('#dexGo').onclick=()=>{ ov.classList.add('hidden'); Music.stop(true); go(); };
+  // red de seguridad: si la ficha falla al rellenarse, el botón ENTRAR aparece igual y no se queda encallado
+  setTimeout(()=>{ if(!ov.classList.contains('hidden')) $('#dexGo').classList.remove('hidden'); },9000); }
 function typeText(el,txt,done){ el.textContent=''; let i=0; const t=()=>{ el.textContent=txt.slice(0,++i); if(i%2===0)blip(900,.02,'square',.04); if(i<txt.length) setTimeout(t,45); else if(done) done(); }; t(); }
 /* --- insignia --- */
 function badgeAnim(phase){ react('ilusionado',3000,true); const ph=PHASES.find(p=>p.id===phase); const ov=$('#badgeOv'); $('#badgeBig').innerHTML=badgeSVG(phase); $('#badgeTxt').textContent='¡INSIGNIA DE '+ph.name.toUpperCase()+'!'; $('#badgeSub').textContent=phase==='dibujo'?'¡Pablo ha completado el Templo del Dibujo y toda la aventura!':'Pablo ha superado el Gimnasio '+ph.name+'. ¡Ya está en el medallero!'; ov.classList.remove('hidden'); jingle8([784,988,1175,1568,1175,1568],.11); burst(50); renderMedallero(phase);
   $('#badgeOk').onclick=()=>{ ov.classList.add('hidden'); if(phase==='dibujo') showEnd(); else if(dibujoUnlocked()&&!G().templeShown){ const g=G(); g.templeShown=true; saveG(g); templeUnlocked(); } else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(true); /* al cerrar la insignia, fundido lento hacia la música del pueblo */ }; }
-function showEnd(){ const ov=$('#endScreen'); ov.classList.remove('hidden'); Music.play('final'); burst(120); setTimeout(()=>burst(80),1200); $('#endOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo'); react('despidiendose',4000,true); setTimeout(()=>react('enamorado',5000),4200); }; }
+function showEnd(){ const ov=$('#endScreen'); ov.classList.remove('hidden'); Music.play('final'); burst(120); setTimeout(()=>burst(80),1200); $('#endOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='dibujo') show('mapa'); if(current==='mapa') Music.play('paseo'); react('despidiendose',4000,true); setTimeout(()=>react('enamorado',5000),4200); }; }
 function templeUnlocked(){ const ov=$('#templeOv'); if(!ov) return; ov.classList.remove('hidden'); react('entusiasmado',0,true); Music.play('victoria'); burst(90); $('#templeOk').onclick=()=>{ ov.classList.add('hidden'); if(current==='mapa') Music.play('paseo',true); }; }
 /* --- combate: lanzar la bola --- */
 // interior épico del gimnasio para el combate: fondo del diseño + suelo en perspectiva + antorchas/focos, con píxel fino
@@ -1794,15 +1848,16 @@ function roar(){ const c=ac(); if(!c)return; const t=c.currentTime; const m=sfxb
 function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.name:'Legendario').toUpperCase(); const ov=$('#battle'); ov.classList.remove('hidden'); window.__battleBiome=pk?pk.biome:'pueblo'; $('#react').classList.add('inbattle'); react('serio',0); const mon=$('#bMon'), ball=$('#bBall'), txt=$('#bTxt'), btns=$('#bBtns'); mon.className='bmon'; ball.style.display='none'; ball.className='ball'; const BALLIMG={fly:'frontal',open:'abierta',luz:'luz',wob:'temblando',got:'completada',fx:'efecto',close:'cerrandose'}; const setBall=(cls)=>{ ball.className='ball '+cls; $('#bBallImg').src='assets/ball/'+(BALLIMG[cls]||'frontal')+'.png'; };
   applyTheme(phase); drawArena($('#arenaBg'),gymDesignFor(phase)); setTimeout(()=>{ if(ov.classList.contains('hidden'))return; roar(); mon.classList.add('shake'); document.body.classList.add('quake'); setTimeout(()=>{ mon.classList.remove('shake'); document.body.classList.remove('quake'); },700); },1150); 
   $('#bMonImg').src=pk?('assets/boss/'+pk.id+'_png.png'):'';
-  $('#bName').textContent=name; Music.play('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },1900);
+  $('#bName').textContent=name; Music.play('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },2700);
   const p=pr0.p;
     $('#bThrow').onclick=()=>{ btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
     const x0=ar.width*.24, y0=ar.height*.22, x1=mr.left-ar.left+mr.width/2-32, y1=ar.height-(mr.top-ar.top+mr.height)-10; const t0=performance.now();
-    const fly=now=>{ const t=Math.min(1,(now-t0)/700); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); },150); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); },950); setTimeout(()=>{ setBall('fly'); },1250); setTimeout(()=>wobbles(0),1500); } }; requestAnimationFrame(fly);
-    const wobbles=n=>{ if(n>=3){ decide(); return; } ball.classList.remove('wob'); void ball.offsetWidth; setBall('wob'); blip(440,.08,'triangle'); txt.textContent='…'+'.'.repeat(n+1); setTimeout(()=>wobbles(n+1),750); };
-    const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
+    const fly=now=>{ const t=Math.min(1,(now-t0)/1000); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); txt.textContent='¡'+name+' entra en la bola!'; },300); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); txt.textContent='La bola se cierra…'; },1400); setTimeout(()=>{ setBall('fly'); },1900); setTimeout(()=>wobbles(0),2400); } }; requestAnimationFrame(fly);
+    const wobbles=n=>{ if(n>=4){ /* un último silencio de tensión antes de saberlo */ ball.classList.remove('wob'); txt.textContent='…'; blip(180,.5,'sine',.05); setTimeout(decide,1200); return; }
+      ball.classList.remove('wob'); void ball.offsetWidth; setBall('wob'); blip(440,.08,'triangle'); txt.textContent='…'+'.'.repeat(n+1); setTimeout(()=>wobbles(n+1),1000); };
+    const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70); setTimeout(()=>burst(50),700); setTimeout(()=>burst(40),1400);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
       else { ball.style.display='none'; react(rpick(['derrota','enojado','molesto','llorando','sufriendo']),0,true); setTimeout(()=>react('triste',0),3000); Music.play('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; jingle8([330,262,196],.14,'sawtooth'); }
-      btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; }; }; }
+      setTimeout(()=>{ if(ov.classList.contains('hidden')) return; btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; },2000); }; }; }
 /* --- colección --- */
 $('#btnCaught').onclick=()=>{ const c=getCaught(); const grid=$('#collGrid'); grid.innerHTML=c.length?'':'<div class="pf" style="color:#fff;font-size:12px;grid-column:1/-1">Todavía no hay ninguno. ¡A por ellos!</div>';
   c.slice().reverse().forEach(it=>{ const d=document.createElement('div'); d.className='ci'; const cn=document.createElement('img'); cn.src=it.img||''; d.appendChild(cn); const n=document.createElement('div'); n.className='cn'; n.textContent=it.name; d.appendChild(n); grid.appendChild(d); });
