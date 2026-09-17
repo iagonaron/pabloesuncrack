@@ -170,7 +170,7 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 .dArt{position:relative;width:min(100%,calc(100vh*1.5));aspect-ratio:3/2;margin:auto;user-select:none}
 .dArt>img{width:100%;height:100%;display:block;pointer-events:none}
 .dArt .cwrap{position:absolute;left:18.6%;top:19.6%;width:62.7%;height:58.5%;border-radius:6px;box-shadow:none;background:#fff}
-.dSlots{position:absolute;top:20.5%;width:4.2%;height:56%;display:flex;flex-direction:column;justify-content:space-between}
+.dSlots{position:absolute;top:24.6%;width:3.8%;height:46%;display:flex;flex-direction:column;justify-content:space-between}
 .dSlots button{width:100%;aspect-ratio:1;border-radius:22%;font-size:clamp(14px,2.2vw,28px);background:#f3ead8;border:2px solid #b8a27a;box-shadow:0 2px 0 #8d7a55;display:grid;place-items:center;padding:0}
 .dSlots button.on{background:#ffcb05;border-color:#b98a2a;outline:3px solid #fff}
 .dFloor{position:absolute;left:4.5%;top:85.5%;width:91%;height:11.5%;display:flex;align-items:center;gap:1.2%;padding:0 .5%}
@@ -221,6 +221,7 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 :root{--pix:"Press Start 2P","Nunito",monospace}
 .pf{font-family:var(--pix);line-height:1.6}
 body.mapmode header{display:none}body.mapmode main{padding:0}
+body.dibmode header{display:none}body.dibmode main{padding:0}
 .mapwrap{position:relative;flex:1;min-height:0;background:#1a3d24;overflow:hidden}
 #mapCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
 .hud{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:14px;padding:10px 16px;pointer-events:none}
@@ -371,6 +372,32 @@ body.mapmode header{display:none}body.mapmode main{padding:0}
 .pctBig{font-size:clamp(60px,12vw,120px);color:#ffcb05;text-shadow:6px 6px 0 #000;animation:pulse2 1s infinite}
 .badgeTxt{font-size:26px;color:#ffcb05;text-shadow:4px 4px 0 #000;text-align:center}
 .badgeSub{font-size:14px;color:#fff;text-align:center;max-width:600px}
+/* ======== CELESTI: diálogo, sprite y acompañante ======== */
+#dlg{position:fixed;inset:0;z-index:160;pointer-events:none}
+#dlgCard{position:absolute;left:18px;bottom:8px}
+.dlgBox{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);pointer-events:auto;cursor:pointer;
+  width:min(560px, calc(100vw - 2*(min(264px,26vw) + 52px)));height:min(264px,26vw)}
+#dlg.hidden{display:none}
+.dlgCard{--rs:min(264px,26vw);width:var(--rs);height:var(--rs);flex:0 0 auto;padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;background:#cfe6ff center/cover;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
+.dlgCard img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:opacity .18s}
+.dlgBox{box-sizing:border-box;background:#fff;border:5px solid #111;border-radius:14px;box-shadow:6px 6px 0 #000;padding:18px 20px;position:relative;display:flex;align-items:center;animation:dlgin .3s cubic-bezier(.2,1.5,.4,1)}
+@keyframes dlgin{from{transform:translateY(20px) scale(.96);opacity:0}}
+.dlgName{position:absolute;left:14px;top:-16px;background:#ffcb05;border:4px solid #111;border-radius:8px;padding:2px 12px;font-family:var(--pix);font-size:12px;color:#2b1a0c;box-shadow:3px 3px 0 #000}
+.dlgName.pa{background:#7fd3ff}
+.dlgTxt{color:#111;font-size:clamp(15px,2vw,23px);font-weight:800;line-height:1.38;letter-spacing:.01em;width:100%}
+.dlgTxt b{color:#c2410c}
+.dlgNext{position:absolute;right:14px;bottom:6px;font-size:20px;color:#111;animation:dlgar .8s infinite}
+@keyframes dlgar{50%{transform:translateY(5px)}}
+body.dlgmode .medallero,body.dlgmode .autoBtn,body.dlgmode .prompt,body.dlgmode .hud{opacity:0;pointer-events:none;transition:opacity .3s}
+/* Celesti acompañante en la pantalla de dibujo */
+#dCelWrap{position:absolute;inset:0;pointer-events:none;z-index:4}
+#dCel{position:absolute;transition:opacity .45s;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28))}
+#dCel img{width:100%;display:block}
+#dCel.flota img{animation:celbob 3.2s ease-in-out infinite}
+@keyframes celbob{0%,100%{transform:translateY(4px) rotate(1deg)}50%{transform:translateY(-8px) rotate(-1.6deg)}}
+#dCel.suelo img{animation:celsit 4.2s ease-in-out infinite}
+@keyframes celsit{50%{transform:translateY(-2px) scale(1.012)}}
+#dFx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
 /* combate */
 #battle{background:#0d1b2a;justify-content:flex-end;gap:0}
 .arena{position:relative;width:100%;flex:1;background:#0d1b2a;image-rendering:pixelated;overflow:hidden}
@@ -527,6 +554,7 @@ main{position:relative}
   </div>
 </div>
 <div id="endScreen" class="hidden"><div class="tArt eArt"><img src="assets/end_bg.jpg" alt="Fin de la partida"><button class="pixbtn eBtn" id="endOk">VOLVER AL PUEBLO</button></div></div>
+<div id="dlg" class="hidden"><div class="dlgCard" id="dlgCard"><img id="dlgCardImg" alt=""></div><div class="dlgBox"><div class="dlgName" id="dlgName">CELESTI</div><div class="dlgTxt" id="dlgTxt"></div><div class="dlgNext">▼</div></div></div>
 <div id="react" class="hidden"><img id="reactImg" alt=""></div>
 <div id="flash"></div>
 <div class="ov hidden" id="templeOv"><div class="templeCard"><img src="assets/gym/fachada_dibujo.png" alt=""><div class="pf templeT">¡TEMPLO DEL DIBUJO DESBLOQUEADO!</div><div class="templeS">Pablo tiene las 4 insignias de hoy. El portal del pueblo se ha encendido: ¡súbete y te llevará al Templo del Dibujo!</div><button class="pixbtn big" id="templeOk">¡VAMOS!</button></div></div>
@@ -647,6 +675,7 @@ function reactBg(){ // fondo del recuadro según dónde estemos: bioma (exterior
   else if(current==='dibujo'){ b='dibujo'; inside=true; }
   else if(GYMS.includes(current)){ b=TODAY_BIOMES[current]||'pueblo'; inside=true; }
   if(!$('#battle').classList.contains('hidden')&&window.__battleBiome){ b=window.__battleBiome; inside=true; }
+  if(b==='dibujo'&&!inside) return 'url("assets/rbg/cielos_ext.jpg")'; // Reino de los Cielos
   return `url("assets/rbg/${b}_${inside?'int':'ext'}.jpg")`; }
 function react(name,ms,big){ const el=$('#react'); if(!el)return; if(GYMS.includes(current)&&!RESULT_MODE){ el.classList.add('hidden'); return; } try{ el.style.backgroundImage=reactBg(); }catch(e){} name=RMAP[name]||name; if(!RALL.includes(name)) name='normal'; const sn=rseen(); sn[name]=(sn[name]||0)+1; saveJSON('pec_rseen',sn);
   const im=$('#reactImg'); const wasHidden=el.classList.contains('hidden'); const src='assets/react2/'+name+'.png'; if(wasHidden||im.src.endsWith(src)){ im.src=src; } else { im.style.opacity='0'; setTimeout(()=>{ im.src=src; im.style.opacity='1'; },180); } el.classList.remove('hidden'); el.classList.toggle('big',!!big); el.classList.toggle('onmap',current==='mapa'); if(wasHidden&&!REACT_SOFT){ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; } clearTimeout(reactTm);
@@ -655,6 +684,71 @@ function react(name,ms,big){ const el=$('#react'); if(!el)return; if(GYMS.includ
 setInterval(()=>{ if(current!=='mapa'||document.hidden) return; const el=$('#react'); if(!el||el.classList.contains('big')) return; const tired=(Date.now()-PLAY_T0)>25*60*1000&&Math.random()<.5; react(tired?'cansado':rpick(['normal','pensativo','confundido','saludando','rie','avergonzado','seguro','alegre']),6000); },40000);
 function reactHide(){ const el=$('#react'); if(el) el.classList.add('hidden'); clearTimeout(reactTm); }
 ['normal','decidido','sorprendido','contento','enfadado','triste','pensativo','pensativo2','combate','lanza','orden','observa','sorpresa','derrota','captura','capturado','victoria','recibe','usa','recupera','subenivel'].forEach(n=>{ const i=new Image(); i.src='assets/react/'+n+'_png.png'; });
+/* ============================================================
+   CELESTI — el pokémon del Reino de los Cielos: diálogos, voz y teletransporte
+   ============================================================ */
+const CEL_REACT=['saluda','rie','pincel','guino','sorpresa','duda','timido','preocupado','enfado','amor','llora','duerme','sereno','magia','feliz','curioso'];
+const CEL_POSE=['flota_0','flota_1','flota_2','flota_3','flota_4','flota_5','flota_6','flota_7','mira_a','mira_b','mira_c','sent_a','sent_b','sent_c','sent_d','pinta_a','pinta_b','pinta_c','pinta_d','tpp_0','tpp_1','tpp_2','tpp_3','tpp_4'];
+setTimeout(()=>{ CEL_REACT.forEach(n=>{ const i=new Image(); i.src='assets/celesti/react/'+n+'.png'; }); CEL_POSE.forEach(n=>{ const i=new Image(); i.src='assets/celesti/pose/'+n+'.png'; }); ['down','up','left','right','downleft','downright','upleft','upright'].forEach(d=>{ for(let k=0;k<4;k++){ const i=new Image(); i.src='assets/celesti2/'+d+'_'+k+'.png'; } }); ['tp0','tp1','tp2','tp3','tp4','tp5','idle','poseA','poseB','poseC'].forEach(n=>{ const i=new Image(); i.src='assets/celesti2/'+n+'.png'; }); const i=new Image(); i.src='assets/rbg/cielos_ext.jpg'; },2200);
+
+/* --- sonidos propios de Celesti --- */
+function celTp(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); const t=c.currentTime;
+  [0,3,5,8,12,15].forEach((st,i)=>{ const o=c.createOscillator(),g=c.createGain(); const tt=t+i*.055; o.type='sine'; o.frequency.setValueAtTime(784*Math.pow(2,st/12),tt); g.gain.setValueAtTime(0,tt); g.gain.linearRampToValueAtTime(.22,tt+.012); g.gain.exponentialRampToValueAtTime(.0001,tt+.6); o.connect(g); g.connect(m); o.start(tt); o.stop(tt+.65); });
+  const len=Math.floor(c.sampleRate*.55); const b=c.createBuffer(1,len,c.sampleRate); const d=b.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);
+  const s=c.createBufferSource(); s.buffer=b; const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(3000,t); f.frequency.exponentialRampToValueAtTime(9000,t+.5); f.Q.value=1.4; const g2=c.createGain(); g2.gain.setValueAtTime(.5,t); g2.gain.exponentialRampToValueAtTime(.001,t+.55); s.connect(f); f.connect(g2); g2.connect(m); s.start(t); }
+function sfxExcl(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); const t=c.currentTime;
+  [[1568,0,.10],[2093,.09,.20]].forEach(([f,d,len])=>{ const o=c.createOscillator(),g=c.createGain(); o.type='square'; o.frequency.setValueAtTime(f,t+d);
+    g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(.16,t+d+.008); g.gain.setValueAtTime(.16,t+d+len*.6); g.gain.exponentialRampToValueAtTime(.0001,t+d+len); o.connect(g); g.connect(m); o.start(t+d); o.stop(t+d+len+.02); }); }
+function celTinkle(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); const t=c.currentTime; const st=[12,16,19,21,24][Math.floor(Math.random()*5)];
+  const o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.value=784*Math.pow(2,st/12); g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.0001,t+.5); o.connect(g); g.connect(m); o.start(t); o.stop(t+.55); }
+let celVi=0;
+function celVoice(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); const t=c.currentTime; const sc=[0,4,7,11,14,7,4]; const n=sc[(celVi++)%7];
+  const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880*Math.pow(2,n/12),t); o.frequency.linearRampToValueAtTime(880*Math.pow(2,(n+3)/12),t+.05);
+  g.gain.setValueAtTime(.075,t); g.gain.exponentialRampToValueAtTime(.0001,t+.085); o.connect(g); g.connect(m); o.start(t); o.stop(t+.1); }
+
+/* --- motor de diálogo (una línea por toque, con voz y reacciones) --- */
+let DLG_ON=false;
+function dlgRun(lines,hook){ return new Promise(res=>{
+  const ov=$('#dlg'), tx=$('#dlgTxt'), nm=$('#dlgName'), im=$('#dlgCardImg'), card=$('#dlgCard');
+  DLG_ON=true; document.body.classList.add('dlgmode'); ov.classList.remove('hidden');
+  try{ card.style.backgroundImage=reactBg(); }catch(e){} // mismo fondo que Pablo: el del sitio donde están
+  let i=-1, typing=false, tm=null, full='';
+  const type=(t)=>{ typing=true; tx.innerHTML=''; let k=0; const step=()=>{ if(!typing) return; k++; tx.innerHTML=t.slice(0,k); if(k%2===0) celVoice(); if(k<t.length){ tm=setTimeout(step,28); } else { typing=false; } }; step(); };
+  const next=()=>{ if(typing){ typing=false; clearTimeout(tm); tx.innerHTML=full; return; }
+    i++; if(i>=lines.length){ end(); return; }
+    const L=lines[i]; full=L.t;
+    nm.textContent=L.n||'CELESTI'; nm.classList.toggle('pa',!!L.pablo); try{ card.style.backgroundImage=reactBg(); }catch(e){}
+    im.style.opacity='0'; setTimeout(()=>{ im.src='assets/celesti/react/'+(L.c||'feliz')+'.png'; im.style.opacity='1'; },140);
+    if(L.p) react(L.p,0);
+    if(hook) hook(L,i);
+    type(full); };
+  const end=()=>{ DLG_ON=false; ov.classList.add('hidden'); document.body.classList.remove('dlgmode'); $('.dlgBox').removeEventListener('pointerdown',tap); window.removeEventListener('keydown',key); res(); };
+  const tap=(e)=>{ e.preventDefault(); ac(); next(); };
+  const key=(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); next(); } };
+  $('.dlgBox').addEventListener('pointerdown',tap); window.addEventListener('keydown',key);
+  next(); }); }
+
+const DLG_INTRO=[
+ {c:'saluda',     p:'sorprendido',  t:'¡Hola, Pablo! Soy <b>CELESTI</b>.'},
+ {c:'feliz',      p:'sorprendido',  t:'Vengo del <b>Reino de los Cielos</b>, muy por encima de las nubes.'},
+ {c:'guino',      p:'contento',     t:'Te veo desde allí arriba todos los días… ¡y sé lo bien que dibujas!'},
+ {c:'amor',       p:'ilusionado',   t:'En mi templo puedes dibujar <b>todo lo que imagines</b>. Lo que sueñes, aparece.'},
+ {c:'pincel',     p:'ilusionado',   t:'¡Me encantaría dibujar contigo allí! Solo tienes que usar la máquina de teletransporte…'},
+ {c:'preocupado', p:'confundido',   t:'…¡Vaya! Parece que <b>no funciona</b>.', look:'pad'},
+ {c:'sorpresa',   p:'sorprendido',  t:'¡Ah, ya sé! Necesita <b>CUATRO INSIGNIAS</b>.', look:'pad'},
+ {c:'curioso',    p:'decidido',     t:'Pablo, tienes que superar los <b>4 gimnasios</b> de la isla.', look:'pablo'},
+ {c:'timido',     p:'serio',        t:'Cada gimnasio lo custodia un <b>legendario</b> que solo existe en este mundo.'},
+ {c:'magia',      p:'seguro',       t:'Para plantarle cara tendrás que superar una <b>prueba de lenguaje musical</b>.'},
+ {c:'feliz',      p:'entusiasmado', t:'Y cuanta más puntuación saques, <b>de 0 a 100</b>… ¡más posibilidades tendrás de capturarlo!'},
+ {c:'rie',        p:'entusiasmado', t:'¿Te imaginas? <b>¡QUÉ EMOCIÓN!</b>'},
+ {c:'saluda',     p:'decidido',     t:'Te veo arriba, Pablo. <b>¡Eres un crack!</b>', look:'pablo'},
+];
+const DLG_CIELO=[
+ {c:'rie',    p:'victoria',     t:'¡Lo conseguiste! <b>¡Sabía que eras un crack!</b>'},
+ {c:'feliz',  p:'ilusionado',   t:'Bienvenido al <b>Reino de los Cielos</b>, Pablo.'},
+ {c:'pincel', p:'entusiasmado', t:'Ve hasta mi templo, te sigo. <b>¡Vamos a dibujar juntos!</b>'},
+];
 function sfxOk(){ react('contento',1400); const c=ac(); if(!c)return; const t=c.currentTime; tone(t,79,.18,.3,'sine'); tone(t+.1,84,.3,.3,'sine'); }
 function sfxBad(){ react('sorprendido',1400); const c=ac(); if(!c)return; const t=c.currentTime; tone(t,50,.25,.25,'sawtooth'); tone(t+.15,47,.35,.2,'sawtooth'); }
 function fanfare(){ const c=ac(); if(!c)return; const t=c.currentTime; [72,76,79,84,79,84].forEach((m,i)=>tone(t+i*.13,m,.35,.3,'square')); }
@@ -755,7 +849,7 @@ function gymWalk(phase,stars,pct){ RESULT_MODE=false; $('#gymWalk').classList.ad
 /* ---------------- navegación ---------------- */
 let current='mapa'; const MODULES={};
 function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); if(id==='dibujo') Music.play('dibujo');
-  $$('.screen').forEach(s=>s.hidden=s.id!==id); const ph=PHASES.find(p=>p.id===id); document.body.classList.toggle('mapmode',id==='mapa');
+  $$('.screen').forEach(s=>s.hidden=s.id!==id); const ph=PHASES.find(p=>p.id===id); document.body.classList.toggle('mapmode',id==='mapa'); document.body.classList.toggle('dibmode',id==='dibujo');
   if(ph){ applyTheme(id); $('#hTitle').textContent='Gimnasio '+ph.name; $('#hLbl').src=LBL(id); $('#hLbl').classList.remove('hidden'); $('#hTitle').classList.add('hidden'); $('#hStars').innerHTML=''; }
   else { applyTheme(null); $('#hLbl').classList.add('hidden'); $('#hTitle').classList.remove('hidden'); $('#hTitle').textContent=id==='admin'?'Ajustes':'…'; $('#hStars').innerHTML=''; }
   gymFrame(GYMS.includes(id)?id:null); document.body.classList.toggle('gymmode',GYMS.includes(id)); if(id!=='mapa'&&id!=='dibujo') Music.stop();
@@ -1126,7 +1220,8 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
   const TOOLS=[['pencil','✏️'],['brush','🖌️'],['line','📏'],['rect','⬜'],['circle','⚪'],['tri','🔺'],['star','⭐'],['fill','🪣'],['eraser','🧽']];
   function build(){ root.innerHTML=`<div class="dArt" id="dArt"><img src="assets/interiors/dibujo.jpg" alt="" draggable="false">
       <div class="cwrap" id="dWrap"><canvas id="dCv"></canvas><canvas id="dOv"></canvas></div>
-      <div class="dSlots" id="dTools" style="left:10.6%"></div><div class="dSlots" id="dTools2" style="left:84.5%"></div>
+      <div class="dSlots" id="dTools" style="left:11.5%"></div><div class="dSlots" id="dTools2" style="left:84.7%"></div>
+      <canvas id="dFx"></canvas><div id="dCelWrap"><div id="dCel"><img id="dCelImg" alt=""></div></div>
       <div class="dFloor"><div class="pal" id="dPal"></div><div class="sizes" id="dSizes"></div><div class="tex" id="dTex"></div><button class="dBig" id="dSave" title="Guardar">💾</button><button class="dBig done" id="dDone" title="Terminado">⭐ ¡Terminado!</button></div></div>`;
     const tl=$('#dTools'), tr=$('#dTools2'); TOOLS.forEach(([id,ic],i)=>{ const b=document.createElement('button'); b.textContent=ic; b.title=id; b.className=id===tool?'on':''; b.onclick=()=>{ tool=id; $$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x===b)); }; (i<6?tl:tr).appendChild(b); });
     [['dUndo','↶','Deshacer'],['dClear','🗑️','Borrar todo'],['dHome','⌂','Volver']].forEach(([id,ic,t])=>{ const b=document.createElement('button'); b.id=id; b.textContent=ic; b.title=t; tr.appendChild(b); });
@@ -1142,11 +1237,63 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     ov.addEventListener('pointerdown',e=>{ e.preventDefault(); ov.setPointerCapture(e.pointerId); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
       if(tool==='fill'){ floodFill(Math.round(x),Math.round(y)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
     ov.addEventListener('pointermove',e=>{ if(!drawing)return; const [x,y]=pos(e); if(tool==='pencil'||tool==='brush'||tool==='eraser'){ seg(last[0],last[1],x,y); last=[x,y]; } else { octx.clearRect(0,0,ov.width,ov.height); shape(octx,sx,sy,x,y); } });
-    const up=e=>{ if(!drawing)return; drawing=false; const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
+    const up=e=>{ if(!drawing)return; drawing=false; celStroke(); const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
     ov.addEventListener('pointerup',up); ov.addEventListener('pointercancel',up);
     $('#dUndo').onclick=()=>{ const im=undo.pop(); if(im)ctx.putImageData(im,0,0); }; $('#dClear').onclick=()=>{ snap(); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); };
     $('#dSave').onclick=()=>{ const a=document.createElement('a'); a.download='dibujo-pablo-'+todayKey()+'.png'; a.href=cv.toDataURL('image/png'); a.click(); };
     $('#dDone').onclick=()=>{ setStars('dibujo',3); fanfare(); burst(60); toast('¡Qué obra de arte!'); setTimeout(()=>show('mapa'),1500); }; }
+  /* ---- Celesti acompañante: mira el lienzo, reacciona y cambia de sitio cada 30 s ---- */
+  const CSPOT=[
+    {l:0.4, t:34, w:10.6, p:['flota_0','flota_4','mira_a']},
+    {l:89.6,t:34, w:10.2, p:['flota_1','flota_5','mira_b']},
+    {l:0.4, t:58, w:10.6, p:['pinta_a','pinta_b','flota_2']},
+    {l:89.6,t:58, w:10.2, p:['pinta_c','pinta_d','flota_6']},
+    {l:29,  t:0.5,w:9,    p:['sent_a','sent_c','flota_3']},
+    {l:62,  t:0.5,w:9,    p:['sent_b','sent_d','flota_7']},
+  ];
+  let cSpot=-1, cTimer=null, cBusy=false, cStrokes=0, cLastDraw=0, cIdle=null, cFx=null, cFxRaf=null;
+  const cImg=n=>'assets/celesti/pose/'+n+'.png';
+  const CEL_SUELO=['pinta_a','pinta_b','pinta_c','pinta_d','sent_a','sent_b','sent_c','sent_d'];
+  function celPose(n){ const im=$('#dCelImg'), el=$('#dCel'); if(!im) return; im.src=cImg(n);
+    const suelo=CEL_SUELO.includes(n); el.classList.toggle('suelo',suelo); el.classList.toggle('flota',!suelo); }
+  function celPlace(i,pose){ const sp=CSPOT[i]; const el=$('#dCel'); if(!el) return; el.style.left=sp.l+'%'; el.style.top=sp.t+'%'; el.style.width=sp.w+'%'; celPose(pose||pick(sp.p)); }
+  async function celMove(){ if(cBusy||current!=='dibujo') return; cBusy=true; const el=$('#dCel'), im=$('#dCelImg');
+    if(cSpot>=0){ celTp(); el.classList.remove('flota','suelo'); for(const f of ['tpp_0','tpp_1','tpp_2','tpp_3','tpp_4']){ im.src=cImg(f); await new Promise(r=>setTimeout(r,120)); } el.style.opacity='0'; await new Promise(r=>setTimeout(r,220)); }
+    let n=cSpot; while(n===cSpot) n=Math.floor(Math.random()*CSPOT.length); cSpot=n;
+    const sp=CSPOT[n]; el.style.left=sp.l+'%'; el.style.top=sp.t+'%'; el.style.width=sp.w+'%'; el.style.opacity='1';
+    if(cSpot>=0){ celTp(); for(const f of ['tpp_4','tpp_3','tpp_2','tpp_1','tpp_0']){ im.src=cImg(f); await new Promise(r=>setTimeout(r,110)); } }
+    celPose(pick(sp.p)); cBusy=false; }
+  function celCheer(){ if(cBusy||current!=='dibujo') return; const im=$('#dCelImg'); const sp=CSPOT[cSpot]||CSPOT[0]; const before=im.src;
+    celPose(pick(['mira_a','mira_b','mira_c'])); celTinkle();
+    const el=$('#dCel'); el.style.transform='scale(1.14)'; setTimeout(()=>{ el.style.transform=''; },420);
+    setTimeout(()=>{ if(!cBusy&&current==='dibujo') celPose(pick(sp.p)); },2600); }
+  function celDibStart(){ cSpot=-1; cBusy=false; cStrokes=0; cLastDraw=Date.now();
+    const el=$('#dCel'); if(el) el.style.transition='opacity .4s,transform .35s cubic-bezier(.2,1.6,.4,1)';
+    celMove();
+    clearInterval(cTimer); cTimer=setInterval(()=>{ if(current==='dibujo'&&!document.hidden) celMove(); },30000);
+    clearInterval(cIdle); cIdle=setInterval(()=>{ if(current!=='dibujo'||cBusy||document.hidden) return; if(Date.now()-cLastDraw>45000){ celPose(pick(['pinta_d','sent_a','sent_b'])); } },12000);
+    celFxStart(); }
+  function celDibStop(){ clearInterval(cTimer); cTimer=null; clearInterval(cIdle); cIdle=null; if(cFxRaf) cancelAnimationFrame(cFxRaf); cFxRaf=null; }
+  function celStroke(){ cLastDraw=Date.now(); cStrokes++; if(cStrokes%11===0) celCheer(); }
+  /* plumas y polvo de luz cayendo (sutil) */
+  function celFxStart(){ const cv2=$('#dFx'); if(!cv2) return; const art=$('#dArt'); const c=cv2.getContext('2d');
+    let P=null;
+    const loop=()=>{ if(current!=='dibujo'){ cFxRaf=null; return; } const W=art.clientWidth,H=art.clientHeight;
+      if(!W||!H){ cFxRaf=requestAnimationFrame(loop); return; }
+      if(cv2.width!==W||cv2.height!==H){ cv2.width=W; cv2.height=H; }
+      if(!P) P=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),v:.012+Math.random()*.022,s:.6+Math.random()*1.1,ph:Math.random()*6.28,k:Math.random()<.45?'pluma':'luz'}));
+      c.clearRect(0,0,W,H); const t=performance.now()/1000;
+      // el lienzo blanco: dentro de él las partículas casi no se ven (no molestan al dibujo)
+      const CX0=.186*W, CX1=(.186+.627)*W, CY0=.196*H, CY1=(.196+.585)*H;
+      P.forEach(p=>{ p.y+=p.v/60; p.x+=Math.sin(t*.7+p.ph)*.0007; if(p.y>1.05){ p.y=-.06; p.x=Math.random(); }
+        const x=p.x*W, y=p.y*H; const inside=(x>CX0&&x<CX1&&y>CY0&&y<CY1); const a=(inside?.10:.45)*(0.6+0.4*Math.sin(t*1.6+p.ph));
+        if(a<=0.01) return; const sz=p.s*Math.min(W,H)*.011;
+        c.save(); c.translate(x,y); c.rotate(Math.sin(t*.9+p.ph)*.6);
+        if(p.k==='pluma'){ c.fillStyle=`rgba(255,246,206,${a})`; c.beginPath(); c.ellipse(0,0,sz*1.9,sz*.55,0,0,7); c.fill(); c.strokeStyle=`rgba(226,198,120,${a*.7})`; c.lineWidth=Math.max(.6,sz*.14); c.beginPath(); c.moveTo(-sz*1.8,0); c.lineTo(sz*1.8,0); c.stroke(); }
+        else { c.fillStyle=`rgba(255,238,170,${a})`; c.fillRect(-sz*.22,-sz,sz*.44,sz*2); c.fillRect(-sz,-sz*.22,sz*2,sz*.44); }
+        c.restore(); });
+      cFxRaf=requestAnimationFrame(loop); };
+    if(cFxRaf) cancelAnimationFrame(cFxRaf); cFxRaf=requestAnimationFrame(loop); }
   function snap(){ undo.push(ctx.getImageData(0,0,cv.width,cv.height)); if(undo.length>25)undo.shift(); }
   function pattern(c){ if(tex==='solid')return color; const p=document.createElement('canvas'); p.width=p.height=16; const pc=p.getContext('2d'); pc.fillStyle=color;
     if(tex==='dots'){ pc.beginPath(); pc.arc(4,4,3,0,7); pc.arc(12,12,3,0,7); pc.fill(); } else if(tex==='stripes'){ pc.fillRect(0,0,16,5); pc.fillRect(0,10,16,3); } else { pc.fillRect(0,0,8,8); pc.fillRect(8,8,8,8); }
@@ -1170,8 +1317,8 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H; const tc=tmp.getContext('2d'); tc.fillStyle=tex==='solid'?color:pattern(tc); tc.fillRect(0,0,W,H); tc.globalCompositeOperation='destination-in'; tc.drawImage(mk,0,0);
     ctx.drawImage(tmp,0,0); }
   function hex2rgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
-  function start(){ undo=[]; build(); }
-  return {start,stop(){}};
+  function start(){ undo=[]; build(); setTimeout(celDibStart,300); }
+  return {start,stop(){ celDibStop(); }};
 })();
 
 /* ============================================================
@@ -1376,6 +1523,103 @@ MODULES.mapa=(()=>{
     // pájaros de vez en cuando (no en el templo)
     if(b!=='dibujo'&&t>LIFE.nextFlock){ LIFE.nextFlock=t+16+Math.random()*12; const y=cy0+Math.random()*vh*.6; const dir=Math.random()<.5?1:-1; for(let i=0;i<5;i++) LIFE.birds.push({x:dir>0?cx0-40-i*22:cx0+vw+40+i*22,y:y+(i%2?12:0)+i*6,dir,ph:i}); }
     for(let i=LIFE.birds.length-1;i>=0;i--){ const bd=LIFE.birds[i]; bd.x+=bd.dir*70*dt; if(bd.x<-200||bd.x>MW+200){ LIFE.birds.splice(i,1); continue; } const fl=Math.sin(t*14+bd.ph); c.strokeStyle='rgba(30,30,50,.85)'; c.lineWidth=2; c.lineCap='round'; c.beginPath(); c.moveTo(bd.x-6,bd.y+fl*3); c.lineTo(bd.x,bd.y); c.lineTo(bd.x+6,bd.y+fl*3); c.stroke(); } }
+  /* ---- Celesti en el mapa: levita en 8 direcciones, tintinea la cola y se teletransporta ---- */
+  const CEL={on:false,x:0,y:0,dir:'down',f:0,a:0,ph:0,scale:1,tp:-1,follow:false,spark:[],tick:0,fx:[],flash:0};
+  const CELH=56;                       // altura de Celesti en px de mapa
+  const TPSEQ=['tp0','tp1','tp2','tp4','tp3','tp5'];   // orden del remolino al desvanecerse
+  function celImg(){ if(CEL.tp>=0){ const k=Math.max(0,Math.min(TPSEQ.length-1,Math.floor(CEL.tp))); return getImg('assets/celesti2/'+TPSEQ[k]+'.png'); }
+    return getImg('assets/celesti2/'+CEL.dir+'_'+(CEL.f|0)+'.png')||getImg('assets/celesti2/down_0.png'); }
+  function celPuff(x,y){ // nubecita con estrellitas: su último rastro
+    CEL.fx.push({k:'nube',x,y,t:0,d:2.3,seed:Math.random()*10});
+    for(let i=0;i<14;i++){ const an=Math.random()*6.28, r=8+Math.random()*26;
+      CEL.fx.push({k:'est',x:x+Math.cos(an)*r*.6,y:y+Math.sin(an)*r*.5,vx:Math.cos(an)*14,vy:Math.sin(an)*10-16,t:0,d:1.1+Math.random()*.9,s:1.4+Math.random()*2.2,r:Math.random()*6.28}); } }
+  function drawCelFx(c,dt,t){ CEL.fx=CEL.fx.filter(f=>{ f.t+=dt; const k=1-f.t/f.d; if(k<=0) return false;
+      if(f.k==='nube'){ const gr=1+(1-k)*.9, yy=f.y-(1-k)*26; c.save(); c.globalAlpha=Math.min(1,k*1.6)*.85;
+        for(let i=0;i<5;i++){ const an=i/5*6.28+f.seed+f.t*.5, rr=(13+Math.sin(f.t*1.6+i)*2.5)*gr;
+          const px=f.x+Math.cos(an)*15*gr, py=yy+Math.sin(an)*7*gr;
+          const g=c.createRadialGradient(px,py,1,px,py,rr); g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(.55,'rgba(255,248,220,.55)'); g.addColorStop(1,'rgba(255,240,190,0)');
+          c.fillStyle=g; c.beginPath(); c.arc(px,py,rr,0,7); c.fill(); }
+        c.restore(); return true; }
+      if(f.k==='est'){ f.x+=f.vx*dt; f.y+=f.vy*dt; f.vy+=16*dt; const sz=f.s*k+.4;
+        c.save(); c.globalAlpha=k; c.translate(f.x,f.y); c.rotate(f.r+f.t*2.4); c.fillStyle='rgba(255,246,190,1)';
+        c.fillRect(-sz*.28,-sz*2,sz*.56,sz*4); c.fillRect(-sz*2,-sz*.28,sz*4,sz*.56); c.restore(); return true; }
+      if(f.k==='anillo'){ const rr=10+(1-k)*74; c.save(); c.globalAlpha=k*.75; c.strokeStyle='rgba(255,240,170,1)'; c.lineWidth=Math.max(1,4*k);
+        c.beginPath(); c.ellipse(f.x,f.y,rr,rr*.42,0,0,7); c.stroke(); c.restore(); return true; }
+      return false; }); }
+  function drawCelesti(c,t,dt){ drawCelFx(c,dt,t); if(!CEL.on) return; const im=celImg(); if(!im||!im.naturalWidth) return;
+    CEL.ph+=dt; CEL.f=(CEL.f+dt*5.5)%4;
+    const bobN=Math.sin(CEL.ph*1.9), bob=bobN*4.5, tilt=Math.sin(CEL.ph*1.1)*.035;
+    const LIFT=15; // separación con el suelo: se nota que levita
+    const tpk=CEL.tp>=0?(CEL.tp/TPSEQ.length):0;
+    const h=CELH*CEL.scale*(1+tpk*.16), w=h*im.naturalWidth/im.naturalHeight;
+    c.save(); c.globalAlpha=CEL.a*.26*(1-tpk)*(1-.22*(bobN*.5+.5)); c.fillStyle='#000'; c.beginPath(); c.ellipse(CEL.x,CEL.y-1,w*.21*(1-.09*(bobN*.5+.5)),4.2,0,0,7); c.fill(); c.restore();
+    const gr=c.createRadialGradient(CEL.x,CEL.y-h*.5-LIFT,2,CEL.x,CEL.y-h*.5-LIFT,h*(.85+tpk*.7)); const pul=.5+.5*Math.sin(t*2.6);
+    gr.addColorStop(0,`rgba(255,240,170,${(.20+tpk*.5)*CEL.a*(.6+.4*pul)})`); gr.addColorStop(1,'rgba(255,230,140,0)');
+    c.fillStyle=gr; c.fillRect(CEL.x-h*1.6,CEL.y-h*2.1-LIFT,h*3.2,h*3.2);
+    c.save(); c.globalAlpha=CEL.a; c.translate(CEL.x,CEL.y-h*.5-LIFT+(CEL.tp>=0?-tpk*16:bob)); c.rotate(CEL.tp>=0?0:tilt);
+    if(CEL.tp>=0){ c.filter='brightness('+(1+tpk*1.5)+')'; }
+    c.drawImage(im,-w/2,-h/2,w,h); c.restore();
+    if(CEL.flash>0){ CEL.flash=Math.max(0,CEL.flash-dt*2.2); const fk=CEL.flash;
+      const g2=c.createRadialGradient(CEL.x,CEL.y-h*.5-LIFT,2,CEL.x,CEL.y-h*.5-LIFT,h*1.9*(1.2-fk*.5));
+      g2.addColorStop(0,`rgba(255,255,245,${fk*.95})`); g2.addColorStop(.45,`rgba(255,244,190,${fk*.5})`); g2.addColorStop(1,'rgba(255,240,170,0)');
+      c.fillStyle=g2; c.fillRect(CEL.x-h*2,CEL.y-h*2.5-LIFT,h*4,h*4); }
+    CEL.tick+=dt;
+    if(CEL.a>.5&&CEL.tp<0&&CEL.tick>.13){ CEL.tick=0;
+      const back=CEL.dir.includes('left')?w*.20:CEL.dir.includes('right')?-w*.20:0;
+      CEL.spark.push({x:CEL.x+back+(Math.random()-.5)*w*.20,y:CEL.y-h*.16-LIFT+bob+(Math.random()-.5)*8,v:(Math.random()*.5+.3),t:0,s:1+Math.random()*1.4,r:Math.random()*6.28});
+      if(CEL.spark.length>34) CEL.spark.shift(); if(Math.random()<.16) celTinkle(); }
+    CEL.spark=CEL.spark.filter(p=>{ p.t+=dt; p.y+=p.v*dt*26; p.x+=Math.sin(p.t*3+p.r)*.35; const k=1-p.t/1.5; if(k<=0) return false;
+      c.fillStyle=`rgba(255,${226+Math.floor(20*k)},${120+Math.floor(80*k)},${k*.95*CEL.a})`; const sz=p.s*k+.5;
+      c.save(); c.translate(p.x,p.y); c.rotate(p.r+p.t*2); c.fillRect(-sz/2,-sz*1.8,sz,sz*3.6); c.fillRect(-sz*1.8,-sz/2,sz*3.6,sz); c.restore(); return true; }); }
+  let EXCL=null;
+  function exclamar(){ EXCL={t:0}; sfxExcl(); }
+  function drawExcl(c,dt){ if(!EXCL) return; EXCL.t+=dt; const k=EXCL.t; if(k>1.65){ EXCL=null; return; }
+    const pop=k<.22?(k/.22):1, sq=k<.22?1+Math.sin(k/.22*Math.PI)*.35:1, fade=k>1.35?1-(k-1.35)/.3:1;
+    const bx=pos.x+2, by=pos.y-74-pop*10+Math.sin(Math.max(0,k-.22)*9)*2*Math.max(0,1-(k-.22)*2);
+    const w=22*sq, h=28*(2-sq)*.98;
+    c.save(); c.globalAlpha=fade;
+    c.fillStyle='#fff'; c.strokeStyle='#111'; c.lineWidth=3.2; c.lineJoin='round';
+    const r=6; c.beginPath(); c.moveTo(bx-w/2+r,by-h); c.lineTo(bx+w/2-r,by-h); c.quadraticCurveTo(bx+w/2,by-h,bx+w/2,by-h+r);
+    c.lineTo(bx+w/2,by-r); c.quadraticCurveTo(bx+w/2,by,bx+w/2-r,by); c.lineTo(bx+4,by); c.lineTo(bx,by+7); c.lineTo(bx-4,by);
+    c.lineTo(bx-w/2+r,by); c.quadraticCurveTo(bx-w/2,by,bx-w/2,by-r); c.lineTo(bx-w/2,by-h+r); c.quadraticCurveTo(bx-w/2,by-h,bx-w/2+r,by-h); c.closePath();
+    c.fill(); c.stroke();
+    c.fillStyle='#111'; c.font='900 '+Math.round(h*.68)+'px "Arial Black",Arial,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('!',bx,by-h*.52);
+    c.restore(); }
+  function celFace(tx,ty){ const dx=tx-CEL.x, dy=ty-(CEL.y-CELH*.5-15); const ax=Math.abs(dx),ay=Math.abs(dy);
+    const h=ax>ay*2.2?'':(dy<0?'up':'down'); const v=ay>ax*2.2?'':(dx<0?'left':'right');
+    CEL.dir=(h+v)||'down'; }
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  function tween(ms,fn){ return new Promise(res=>{ const t0=performance.now(); const st=(n)=>{ const k=Math.min(1,(n-t0)/ms); fn(k); if(k<1) requestAnimationFrame(st); else res(); }; requestAnimationFrame(st); }); }
+  const easeOut=k=>1-Math.pow(1-k,3);
+  async function celAppear(fromDir){ CEL.on=true; CEL.tp=-1; CEL.scale=1; CEL.spark.length=0; CEL.flash=0;
+    const tx=pos.x+78, ty=pos.y; const d={S:[0,300],N:[0,-300],E:[300,0],W:[-300,0]}[fromDir||'S'];
+    CEL.x=tx+d[0]; CEL.y=ty+d[1]; CEL.a=0; CEL.dir=fromDir==='S'?'up':fromDir==='N'?'down':fromDir==='E'?'left':'right';
+    const x0=CEL.x,y0=CEL.y; celTinkle(); setTimeout(()=>{ exclamar(); react('sorprendido',2200,true); },820);
+    await tween(1600,k=>{ const e=easeOut(k); CEL.x=x0+(tx-x0)*e; CEL.y=y0+(ty-y0)*e+Math.sin(k*Math.PI)*10; CEL.a=Math.min(1,k*2.2); });
+    celFace(pos.x,pos.y-30); face='right'; }
+  async function celTeleport(){ celTp(); CEL.tp=0; CEL.flash=.35;
+    CEL.fx.push({k:'anillo',x:CEL.x,y:CEL.y-CELH*.5-15,t:0,d:.9});
+    await tween(1250,k=>{ CEL.tp=k*(TPSEQ.length-0.01); if(k>.72){ CEL.flash=Math.max(CEL.flash,(k-.72)/.28); CEL.a=1-(k-.86)/.14*0+1; } });
+    CEL.flash=1; CEL.a=0; CEL.on=false; CEL.tp=-1; CEL.spark.length=0;
+    CEL.fx.push({k:'anillo',x:CEL.x,y:CEL.y-CELH*.5-15,t:0,d:.8});
+    celPuff(CEL.x,CEL.y-CELH*.55-15); }
+  async function celArrive(x,y){ CEL.on=true; CEL.x=x; CEL.y=y; CEL.a=1; CEL.dir='down'; CEL.spark.length=0;
+    celTp(); CEL.fx.push({k:'anillo',x,y:y-CELH*.5-15,t:0,d:.8}); celPuff(x,y-CELH*.55-15);
+    CEL.tp=TPSEQ.length-0.01; await tween(1000,k=>{ CEL.tp=(1-k)*(TPSEQ.length-0.01); }); CEL.tp=-1; CEL.flash=.5; }
+  /* presentación: Celesti llega desde el sur, habla y se teletransporta */
+  const waitTitle=()=>new Promise(r=>{ const ck=()=>{ const ts=$('#titleScreen'); if(!ts||ts.classList.contains('hidden')) r(); else setTimeout(ck,180); }; ck(); });
+  async function celIntro(){ busy=true; route=null; vel={x:0,y:0}; hidePrompt(); face='down';
+    await waitTitle(); await wait(650); await celAppear('S');
+    await dlgRun(DLG_INTRO,(L)=>{ if(L.look==='pad'){ const [px,py]=P(...SC.pueblo.pad); celFace(px,py); } else if(L.look==='pablo'){ celFace(pos.x,pos.y-30); } });
+    CEL.dir='down'; await wait(500);            // mira hacia abajo, a Pablo, antes de irse
+    await celTeleport(); face='down'; react('decidido',2500);
+    const g=G(); g.introSeen=true; saveG(g); busy=false; }
+  /* al llegar al Reino de los Cielos: Celesti le recibe y luego le acompaña */
+  async function celCielo(){ busy=true; route=null; vel={x:0,y:0}; await wait(600);
+    await celArrive(pos.x+80,pos.y); celFace(pos.x,pos.y-30); face='right';
+    await dlgRun(DLG_CIELO,(L,i)=>{ if(i===2){ const [dx,dy]=P(...SC.dibujo.door); celFace(dx,dy); } });
+    CEL.follow=true; face='up'; const g=G(); g.cieloSeen=true; saveG(g); busy=false; react('ilusionado',3000); }
   function drawScreen(c,s,cam,t,dt,withPablo){ const im=IMGM(s.img); c.save(); c.scale(Z,Z); c.translate(-cam.x/Z,-cam.y/Z); c.imageSmoothingEnabled=true; if(im) c.drawImage(im,0,0,MW,MH); else { c.fillStyle='#1c5fb8'; c.fillRect(0,0,MW,MH); }
     const vw=VW/Z, vh=VH/Z, cx0=cam.x/Z, cy0=cam.y/Z;
     // carteles
@@ -1384,7 +1628,7 @@ MODULES.mapa=(()=>{
     // brillo de la puerta del gimnasio
     if(s.door&&!s.interior){ const [dx,dy]=P(...s.door); const a=.18+.1*Math.sin(t*3); const g=c.createRadialGradient(dx,dy-10,2,dx,dy-10,46); g.addColorStop(0,`rgba(255,240,160,${a})`); g.addColorStop(1,'rgba(255,240,160,0)'); c.fillStyle=g; c.fillRect(dx-50,dy-60,100,100); }
     drawMaterialFx(c,t,s,cx0,cy0,vw,vh); drawLife(c,t,dt,s,cx0,cy0,vw,vh);
-    if(withPablo){ const walking=(vel.x||vel.y)||(route&&route.length); const fr=walking?1+Math.floor(walkT*9)%4:0; drawPablo8(c,pos.x,pos.y,fr); }
+    if(withPablo){ const walking=(vel.x||vel.y)||(route&&route.length); const fr=walking?1+Math.floor(walkT*9)%4:0; const celFirst=CEL.on&&CEL.y<pos.y; if(celFirst) drawCelesti(c,t,dt); drawPablo8(c,pos.x,pos.y,fr); if(!celFirst) drawCelesti(c,t,dt); drawExcl(c,dt); }
     c.restore(); }
   // ---- lógica ----
   function setScreen(id,at,fc){ screen=id; pos={x:at[0],y:at[1]}; face=fc||'up'; zoneArmed=false; route=null; vel={x:0,y:0}; LIFE.parts=null; LIFE.birds=[]; FX.grass.length=0; FX.prints.length=0; setZoom(); const cm=camFor(pos); camX=cm.x; camY=cm.y; hidePrompt(); const g=G(); g.screen=screen; g.pos=pos; saveG(g); musicFor(); }
@@ -1398,6 +1642,7 @@ MODULES.mapa=(()=>{
       if(route&&route.length){ const n=route[0]; const ddx=n.x-pos.x, ddy=n.y-pos.y; const d=Math.hypot(ddx,ddy); if(d<6){ route.shift(); if(!route.length){ route=null; onArrive(); } } else { dx=ddx/d; dy=ddy/d; } }
       if(dx||dy){ const m=Math.hypot(dx,dy); dx/=m; dy/=m; face=DIR8(Math.round(dx),Math.round(dy)); if(tryMove(dx,dy,dt)){ walkT+=dt; stepAcc+=dt; walkCont+=dt; if(walkCont>10){ walkCont=0; react('cansado',3000); } if(stepAcc>.22){ stepAcc=0; stepSide=-stepSide; footstep(stepFx(now/1000,dx,dy,stepSide)); } } else if(route){ route.shift(); if(!route.length){ route=null; onArrive(); } } checkZones(); } else walkCont=0;
     if(!trans&&!busy) doorCheck();
+    celFollow(dt);
     }
     draw(now,dt); raf=requestAnimationFrame(step); }
   /* ---- escena del jefe (ilustración de Iago con vida: respiración, luces, partículas) ---- */
@@ -1446,8 +1691,10 @@ MODULES.mapa=(()=>{
     else if(s.interior){ if(s.door){ const [dx,dy]=P(...s.door); if(pos.y<=dy+14&&bossState&&!bossState.shown) onArrive(); } }
     else { if(zoneArmed&&inExitZone()){ const d=DIRS.find(k=>TODAY_BIOMES[EXIT[k]]===screen)||'S'; const back={N:'S',S:'N',E:'W',W:'E'}[d]; const [bx,by]=P(...SC.pueblo.exits[d]); const inward={N:[0,110],S:[0,-110],E:[-110,0],W:[110,0]}[d]; startTrans(back,'pueblo',snapWalk(SC.pueblo,bx+inward[0],by+inward[1])); return; }
       doorCheck(); } }
+  function celFollow(dt){ if(!CEL.on||!CEL.follow||CEL.tp>=0) return; const tx=pos.x+72, ty=pos.y; const dx=tx-CEL.x, dy=ty-CEL.y; const d=Math.hypot(dx,dy);
+    if(d>26){ const sp=Math.min(d*3.2,230)*dt; CEL.x+=dx/d*sp; CEL.y+=dy/d*sp; if(d>34) CEL.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down'); } else if(!(vel.x||vel.y||(route&&route.length))) celFace(pos.x,pos.y-30); }
   function doorCheck(){ const s=SC[screen]; if(!s||s.interior||!s.door||busy) return; const [dx,dy]=P(...s.door); const d=Math.hypot(pos.x-dx,pos.y-dy); if(d<44&&!atGym) onArrive(); else if(atGym&&atGym!=='__boss'&&d>80) hidePrompt(); }
-  function teleport(){ if(busy) return; busy=true; vel={x:0,y:0}; route=null; react('sorpresa',2000,true); jingle8([880,1320,1760,2640],.08); const fl=$('#flash'); fl.classList.add('on'); setTimeout(()=>{ setScreen('dibujo',P(...SC.dibujo.entry),'up'); busy=false; fl.classList.remove('on'); },700); }
+  function teleport(){ if(busy) return; busy=true; vel={x:0,y:0}; route=null; react('sorpresa',2000,true); jingle8([880,1320,1760,2640],.08); const fl=$('#flash'); fl.classList.add('on'); setTimeout(()=>{ const [ex,ey]=P(...SC.dibujo.entry); setScreen('dibujo',snapWalk(SC.dibujo,ex,ey-165),'up'); busy=false; fl.classList.remove('on'); if(!G().cieloSeen) setTimeout(()=>celCielo(),400); else { CEL.on=true; CEL.a=1; CEL.tp=-1; CEL.x=pos.x+70; CEL.y=pos.y; CEL.follow=true; } },700); }
   function draw(now,dt){ const t=now/1000; if(!trans){ const cm=camFor(pos); camX+=(cm.x-camX)*.14; camY+=(cm.y-camY)*.14; if(Math.abs(cm.x-camX)<.5)camX=cm.x; if(Math.abs(cm.y-camY)<.5)camY=cm.y; }
     ctx.fillStyle='#000'; ctx.fillRect(0,0,VW,VH);
     if(trans){ const e=trans.t<.5?2*trans.t*trans.t:1-Math.pow(-2*trans.t+2,2)/2; const dx={N:0,S:0,E:-1,W:1}[trans.dir]*VW*e, dy={N:1,S:-1,E:0,W:0}[trans.dir]*VH*e; // la pantalla vieja sale, la nueva entra
@@ -1473,6 +1720,9 @@ MODULES.mapa=(()=>{
     const nt=nextTarget(); $('#btnAuto').textContent=nt==='dibujo'?(screen==='dibujo'?'✨ Ir al Templo':dibujoUnlocked()||forceTemple?'✨ Ir al portal':'🚶 Volver al pueblo'):'🚶 Ir a Gimnasio '+PHASES.find(p=>p.id===nt).name;
     if(!g.newMedal) musicFor(); /* si hay insignia pendiente, sigue la música de victoria hasta cerrar la tarjeta */ react('normal',0);
     if(g.newMedal){ const m=g.newMedal; g.newMedal=null; saveG(g); setTimeout(()=>badgeAnim(m),400); }
+    CEL.on=false; CEL.follow=false; CEL.tp=-1;
+    if(!g.introSeen&&screen==='pueblo'&&!g.newMedal&&!pendingInterior){ setTimeout(()=>{ if(current==='mapa'&&screen==='pueblo') celIntro(); },700); }
+    else if(screen==='dibujo'&&G().cieloSeen){ CEL.on=true; CEL.a=1; CEL.tp=-1; CEL.x=pos.x+70; CEL.y=pos.y; CEL.follow=true; }
     window.addEventListener('resize',size); }
   function stop(){ if(raf)cancelAnimationFrame(raf); raf=null; window.removeEventListener('resize',size); if(started&&pos.x>0&&pos.y>0){ const g=G(); g.pos=pos; g.screen=screen; saveG(g); } }
   function interior(phase,stars,pct){ pendingInterior={phase,stars,pct,biome:TODAY_BIOMES[phase]}; show('mapa'); }
@@ -1586,7 +1836,7 @@ $('#btnFull').onclick=toggleFull; $('#btnFull2').onclick=toggleFull;
 // iPad: si cambia el viewport (barra de Safari, rotación, pantalla completa, teclado) se recoloca todo y nunca queda una franja negra
 (function(){ const fix=()=>{ window.scrollTo(0,0); document.documentElement.style.height=window.innerHeight+'px'; document.body.style.height=window.innerHeight+'px'; if(window.visualViewport){ document.body.style.height=Math.round(window.visualViewport.height)+'px'; } }; fix(); ['resize','orientationchange','pageshow','focus'].forEach(ev=>window.addEventListener(ev,()=>{ fix(); setTimeout(fix,300); })); if(window.visualViewport) window.visualViewport.addEventListener('resize',()=>{ fix(); setTimeout(fix,300); }); document.addEventListener('touchmove',e=>{ if(e.touches.length>1) e.preventDefault(); },{passive:false}); })();
 // atajo discreto del profe: mantener pulsado ~0,8 s el lápiz lleva directo a Dibujo (un toque suelto no hace nada)
-{ const b=$('#btnDrawNow'); b.addEventListener('click',e=>{ e.preventDefault(); ac(); show('dibujo'); }); } // botón discreto ✎: abre directamente la pizarra de dibujo
+{ const b=$('#btnDrawNow'); b.addEventListener('click',e=>{ e.preventDefault(); if(DLG_ON) return; ac(); show('dibujo'); }); } // botón discreto ✎: abre directamente la pizarra de dibujo
 /* ---------------- portada ---------------- */
 (function(){ const cv=$('#titleSea'); let raf=null; function draw(t){ const W=cv.width=cv.clientWidth, H=cv.height=cv.clientHeight; const c=cv.getContext('2d'); const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2a7fd6'); g.addColorStop(1,'#0b2a8a'); c.fillStyle=g; c.fillRect(0,0,W,H);
     const tw=getImg('assets/tex/water'+(Math.floor(t/140)%4)+'.png'); if(tw){ c.save(); c.globalAlpha=.45; const pat=c.createPattern(tw,'repeat'); c.scale(1.6,1.6); c.translate(-(t/60)%256,0); c.fillStyle=pat; c.fillRect(0,0,W/1.6+512,H/1.6); c.restore(); }
