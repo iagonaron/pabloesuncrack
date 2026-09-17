@@ -169,7 +169,7 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 #dibujo{background:#0d1b38;padding:0;display:flex;align-items:center;justify-content:center}
 .dArt{position:relative;width:min(100%,calc(100vh*1.5));aspect-ratio:3/2;margin:auto;user-select:none}
 .dArt>img{width:100%;height:100%;display:block;pointer-events:none}
-.dArt .cwrap{position:absolute;left:18.6%;top:19.6%;width:62.7%;height:58.5%;border-radius:6px;box-shadow:none;background:#fff}
+.dArt .cwrap{position:absolute;left:15.9%;top:15.4%;width:67.6%;height:68%;border-radius:6px;box-shadow:none;background:#fff}
 .dSlots{position:absolute;top:24.6%;width:3.8%;height:46%;display:flex;flex-direction:column;justify-content:space-between}
 .dSlots button{width:100%;aspect-ratio:1;border-radius:22%;font-size:clamp(14px,2.2vw,28px);background:#f3ead8;border:2px solid #b8a27a;box-shadow:0 2px 0 #8d7a55;display:grid;place-items:center;padding:0}
 .dSlots button.on{background:#ffcb05;border-color:#b98a2a;outline:3px solid #fff}
@@ -261,7 +261,7 @@ body.dibmode header{display:none}body.dibmode main{padding:0}
 @keyframes tglow{50%{box-shadow:0 0 0 6px rgba(255,220,60,.55),0 0 30px rgba(255,220,60,.6)}}
 #react{position:fixed;right:18px;bottom:8px;z-index:150;background-size:cover!important;background-position:center;--rs:min(264px,26vw);width:var(--rs);height:var(--rs);padding:calc(var(--rs)*.11) calc(var(--rs)*.14) calc(var(--rs)*.08);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);background:radial-gradient(circle at 50% 30%,#3b6cd6,#0b2a8a);transform-origin:bottom right;animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
 #react.hidden{display:none}
-#react img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:opacity .18s}
+#react img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
 #react{transition:width .35s,height .35s,bottom .35s,right .35s,opacity .45s}
 #react.big{--rs:min(300px,32vw);bottom:96px}
 #react.onmap{bottom:22px}
@@ -379,7 +379,7 @@ body.dibmode header{display:none}body.dibmode main{padding:0}
   pointer-events:auto;cursor:pointer;height:min(264px,26vw)}
 #dlg.hidden{display:none}
 .dlgCard{--rs:min(264px,26vw);width:var(--rs);height:var(--rs);flex:0 0 auto;padding:calc(var(--rs)*.04) calc(var(--rs)*.045) calc(var(--rs)*.03);box-sizing:border-box;border:4px solid #ffcb05;border-radius:16px;overflow:hidden;background:#cfe6ff center/cover;box-shadow:4px 4px 0 #0b1a5a,0 10px 30px rgba(0,0,0,.45);animation:rpop .35s cubic-bezier(.2,1.6,.4,1)}
-.dlgCard img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%;transform:scale(1.07);filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:opacity .18s}
+.dlgCard img{width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%;transform:scale(1.07);filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
 .dlgBox{box-sizing:border-box;background:#fff;border:5px solid #111;border-radius:14px;box-shadow:6px 6px 0 #000;padding:18px 20px;display:flex;align-items:center;animation:dlgin .3s cubic-bezier(.2,1.5,.4,1)}
 @keyframes dlgin{from{transform:translateY(20px) scale(.96);opacity:0}}
 .dlgName{position:absolute;left:14px;top:-16px;background:#ffcb05;border:4px solid #111;border-radius:8px;padding:2px 12px;font-family:var(--pix);font-size:12px;color:#2b1a0c;box-shadow:3px 3px 0 #000}
@@ -678,8 +678,8 @@ function reactBg(){ // fondo del recuadro según dónde estemos: bioma (exterior
   if(b==='dibujo'&&!inside) return 'url("assets/rbg/cielos_ext.jpg")'; // Reino de los Cielos
   return `url("assets/rbg/${b}_${inside?'int':'ext'}.jpg")`; }
 function react(name,ms,big){ const el=$('#react'); if(!el)return; if(GYMS.includes(current)&&!RESULT_MODE){ el.classList.add('hidden'); return; } try{ el.style.backgroundImage=reactBg(); }catch(e){} name=RMAP[name]||name; if(!RALL.includes(name)) name='normal'; const sn=rseen(); sn[name]=(sn[name]||0)+1; saveJSON('pec_rseen',sn);
-  const im=$('#reactImg'); const wasHidden=el.classList.contains('hidden'); const src='assets/react2/'+name+'.png'; if(wasHidden||im.src.endsWith(src)){ im.src=src; } else { im.style.opacity='0'; setTimeout(()=>{ im.src=src; im.style.opacity='1'; },180); } el.classList.remove('hidden'); el.classList.toggle('big',!!big); el.classList.toggle('onmap',current==='mapa'); if(wasHidden&&!REACT_SOFT){ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; } clearTimeout(reactTm);
-  if(ms){ reactTm=setTimeout(()=>{ im.style.opacity='0'; setTimeout(()=>{ im.src='assets/react2/'+(current==='mapa'?'normal':'decidido')+'.png'; im.style.opacity='1'; },180); el.classList.remove('big'); },ms); } }
+  const im=$('#reactImg'); const wasHidden=el.classList.contains('hidden'); const src='assets/react2/'+name+'.png'; im.src=src; im.style.opacity='1'; el.classList.remove('hidden'); el.classList.toggle('big',!!big); el.classList.toggle('onmap',current==='mapa'); if(wasHidden&&!REACT_SOFT){ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; } clearTimeout(reactTm);
+  if(ms){ reactTm=setTimeout(()=>{ im.src='assets/react2/'+(current==='mapa'?'normal':'decidido')+'.png'; im.style.opacity='1'; el.classList.remove('big'); },ms); } }
 // caras "de fondo" en el mapa: cada ~40 s, si no hay otra reacción, una cara distinta; con más de 25 min de juego, a veces "cansado"
 setInterval(()=>{ if(current!=='mapa'||document.hidden) return; const el=$('#react'); if(!el||el.classList.contains('big')) return; const tired=(Date.now()-PLAY_T0)>25*60*1000&&Math.random()<.5; react(tired?'cansado':rpick(['normal','pensativo','confundido','saludando','rie','avergonzado','seguro','alegre']),6000); },40000);
 function reactHide(){ const el=$('#react'); if(el) el.classList.add('hidden'); clearTimeout(reactTm); }
@@ -705,7 +705,7 @@ function celTinkle(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); co
 let celVi=0;
 function celVoice(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); const t=c.currentTime; const sc=[0,4,7,11,14,7,4]; const n=sc[(celVi++)%7];
   const o=c.createOscillator(),g=c.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880*Math.pow(2,n/12),t); o.frequency.linearRampToValueAtTime(880*Math.pow(2,(n+3)/12),t+.05);
-  g.gain.setValueAtTime(.075,t); g.gain.exponentialRampToValueAtTime(.0001,t+.085); o.connect(g); g.connect(m); o.start(t); o.stop(t+.1); }
+  g.gain.setValueAtTime(.19,t); g.gain.exponentialRampToValueAtTime(.0001,t+.105); o.connect(g); g.connect(m); o.start(t); o.stop(t+.12); }
 
 /* --- motor de diálogo (una línea por toque, con voz y reacciones) --- */
 let DLG_ON=false;
@@ -713,17 +713,18 @@ function dlgRun(lines,hook){ return new Promise(res=>{
   const ov=$('#dlg'), tx=$('#dlgTxt'), nm=$('#dlgName'), im=$('#dlgCardImg'), card=$('#dlgCard');
   DLG_ON=true; document.body.classList.add('dlgmode'); ov.classList.remove('hidden');
   try{ card.style.backgroundImage=reactBg(); }catch(e){} // mismo fondo que Pablo: el del sitio donde están
-  let i=-1, typing=false, tm=null, full='';
+  let i=-1, typing=false, tm=null, full='', autoTm=null;
   const type=(t)=>{ typing=true; tx.innerHTML=''; let k=0; const step=()=>{ if(!typing) return; k++; tx.innerHTML=t.slice(0,k); if(k%2===0) celVoice(); if(k<t.length){ tm=setTimeout(step,28); } else { typing=false; } }; step(); };
-  const next=()=>{ if(typing){ typing=false; clearTimeout(tm); tx.innerHTML=full; return; }
+  const next=()=>{ clearTimeout(autoTm); if(typing){ typing=false; clearTimeout(tm); tx.innerHTML=full; return; }
     i++; if(i>=lines.length){ end(); return; }
     const L=lines[i]; full=L.t;
     nm.textContent=L.n||'CELESTI'; nm.classList.toggle('pa',!!L.pablo); try{ card.style.backgroundImage=reactBg(); }catch(e){}
-    im.style.opacity='0'; setTimeout(()=>{ im.src='assets/celesti/react/'+(L.c||'feliz')+'.png'; im.style.opacity='1'; },140);
+    im.src='assets/celesti/react/'+(L.c||'feliz')+'.png'; im.style.opacity='1';
     if(L.p) react(L.p,0);
     if(hook) hook(L,i);
-    type(full); };
-  const end=()=>{ DLG_ON=false; ov.classList.add('hidden'); document.body.classList.remove('dlgmode'); $('.dlgBox').removeEventListener('pointerdown',tap); window.removeEventListener('keydown',key); res(); };
+    type(full);
+    if(L.auto){ const my=i; autoTm=setTimeout(()=>{ if(i===my&&DLG_ON) next(); }, L.auto+full.length*28); } };
+  const end=()=>{ clearTimeout(autoTm); DLG_ON=false; ov.classList.add('hidden'); document.body.classList.remove('dlgmode'); $('.dlgBox').removeEventListener('pointerdown',tap); window.removeEventListener('keydown',key); res(); };
   const tap=(e)=>{ e.preventDefault(); ac(); next(); };
   const key=(e)=>{ if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); next(); } };
   $('.dlgBox').addEventListener('pointerdown',tap); window.addEventListener('keydown',key);
@@ -735,9 +736,10 @@ const DLG_INTRO=[
  {c:'guino',      p:'contento',     t:'Te veo desde allí arriba todos los días… ¡y sé lo bien que dibujas!'},
  {c:'amor',       p:'ilusionado',   t:'En mi templo puedes dibujar <b>todo lo que imagines</b>. Lo que sueñes, aparece.'},
  {c:'pincel',     p:'ilusionado',   t:'¡Me encantaría dibujar contigo allí! Solo tienes que usar la máquina de teletransporte…'},
+ {c:'curioso',    p:'confundido',   t:'(…)', go:'pad', auto:1500},
  {c:'preocupado', p:'confundido',   t:'…¡Vaya! Parece que <b>no funciona</b>.', look:'pad'},
  {c:'sorpresa',   p:'sorprendido',  t:'¡Ah, ya sé! Necesita <b>CUATRO INSIGNIAS</b>.', look:'pad'},
- {c:'curioso',    p:'decidido',     t:'Pablo, tienes que superar los <b>4 gimnasios</b> de la isla.', look:'pablo'},
+ {c:'curioso',    p:'decidido',     t:'Pablo, tienes que superar los <b>4 gimnasios</b> de la isla.', go:'pablo'},
  {c:'timido',     p:'serio',        t:'Cada gimnasio lo custodia un <b>legendario</b> que solo existe en este mundo.'},
  {c:'magia',      p:'seguro',       t:'Para plantarle cara tendrás que superar una <b>prueba de lenguaje musical</b>.'},
  {c:'feliz',      p:'entusiasmado', t:'Y cuanta más puntuación saques, <b>de 0 a 100</b>… ¡más posibilidades tendrás de capturarlo!'},
@@ -1215,7 +1217,7 @@ MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4
 /* ============================================================
    DIBUJO — paint libre
    ============================================================ */
-MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',color='#e53935',size=8,tex='solid',drawing=false,sx=0,sy=0,last=null,undo=[];
+MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',color='#000000',size=4,tex='solid',drawing=false,sx=0,sy=0,last=null,undo=[];
   const COLORS=['#000000','#ffffff','#9e9e9e','#e53935','#fb8c00','#f4c400','#43a047','#1e88e5','#8e24aa','#ec407a','#8d6e63','#00bcd4','#c6ff00','#ff7043','#3949ab','#ffd7b5'];
   const TOOLS=[['pencil','✏️'],['brush','🖌️'],['line','📏'],['rect','⬜'],['circle','⚪'],['tri','🔺'],['star','⭐'],['fill','🪣'],['eraser','🧽']];
   function build(){ root.innerHTML=`<div class="dArt" id="dArt"><img src="assets/interiors/dibujo.jpg" alt="" draggable="false">
@@ -1227,7 +1229,7 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     [['dUndo','↶','Deshacer'],['dClear','🗑️','Borrar todo'],['dHome','⌂','Volver']].forEach(([id,ic,t])=>{ const b=document.createElement('button'); b.id=id; b.textContent=ic; b.title=t; tr.appendChild(b); });
     $('#dHome').onclick=()=>show('mapa');
     const pal=$('#dPal'); COLORS.forEach(c=>{ const b=document.createElement('button'); b.style.background=c; b.className=c===color?'on':''; b.onclick=()=>{ color=c; $$('#dPal button').forEach(x=>x.classList.toggle('on',x===b)); if(tool==='eraser'){tool='pencil';$$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x.title==='pencil'));} }; pal.appendChild(b); });
-    const sz=$('#dSizes'); [4,8,16,28].forEach(s=>{ const b=document.createElement('button'); b.innerHTML=`<i style="width:${Math.min(28,s)}px;height:${Math.min(28,s)}px"></i>`; b.className=s===size?'on':''; b.onclick=()=>{ size=s; $$('#dSizes button').forEach(x=>x.classList.toggle('on',x===b)); }; sz.appendChild(b); });
+    const sz=$('#dSizes'); [2,4,10,20].forEach(s=>{ const b=document.createElement('button'); const ds=Math.round(Math.min(26,3+s*1.1)); b.innerHTML=`<i style="width:${ds}px;height:${ds}px"></i>`; b.className=s===size?'on':''; b.onclick=()=>{ size=s; $$('#dSizes button').forEach(x=>x.classList.toggle('on',x===b)); }; sz.appendChild(b); });
     const tx=$('#dTex'); [['solid','Liso'],['dots','Puntos'],['stripes','Rayas'],['check','Cuadros']].forEach(([id,nm])=>{ const b=document.createElement('button'); b.textContent=nm; b.className=id===tex?'on':''; b.onclick=()=>{ tex=id; $$('#dTex button').forEach(x=>x.classList.toggle('on',x===b)); }; tx.appendChild(b); });
     cv=$('#dCv'); ov=$('#dOv'); ctx=cv.getContext('2d'); octx=ov.getContext('2d');
     const wrap=$('#dWrap'); let inited=false; const fit=()=>{ const w=wrap.clientWidth,h=wrap.clientHeight; if(!w||!h||(cv.width===w&&cv.height===h))return; let old=null; if(inited){ old=document.createElement('canvas'); old.width=cv.width; old.height=cv.height; old.getContext('2d').drawImage(cv,0,0); }
@@ -1284,7 +1286,7 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
       if(!P) P=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),v:.012+Math.random()*.022,s:.6+Math.random()*1.1,ph:Math.random()*6.28,k:Math.random()<.45?'pluma':'luz'}));
       c.clearRect(0,0,W,H); const t=performance.now()/1000;
       // el lienzo blanco: dentro de él las partículas casi no se ven (no molestan al dibujo)
-      const CX0=.186*W, CX1=(.186+.627)*W, CY0=.196*H, CY1=(.196+.585)*H;
+      const CX0=.159*W, CX1=(.159+.676)*W, CY0=.154*H, CY1=(.154+.68)*H;
       P.forEach(p=>{ p.y+=p.v/60; p.x+=Math.sin(t*.7+p.ph)*.0007; if(p.y>1.05){ p.y=-.06; p.x=Math.random(); }
         const x=p.x*W, y=p.y*H; const inside=(x>CX0&&x<CX1&&y>CY0&&y<CY1); const a=(inside?.10:.45)*(0.6+0.4*Math.sin(t*1.6+p.ph));
         if(a<=0.01) return; const sz=p.s*Math.min(W,H)*.011;
@@ -1593,11 +1595,13 @@ MODULES.mapa=(()=>{
   function tween(ms,fn){ return new Promise(res=>{ const t0=performance.now(); const st=(n)=>{ const k=Math.min(1,(n-t0)/ms); fn(k); if(k<1) requestAnimationFrame(st); else res(); }; requestAnimationFrame(st); }); }
   const easeOut=k=>1-Math.pow(1-k,3);
   async function celAppear(fromDir){ CEL.on=true; CEL.tp=-1; CEL.scale=1; CEL.spark.length=0; CEL.flash=0;
-    const tx=pos.x+78, ty=pos.y; const d={S:[0,300],N:[0,-300],E:[300,0],W:[-300,0]}[fromDir||'S'];
+    const tx=pos.x+78, ty=pos.y; const d={S:[0,520],N:[0,-520],E:[430,0],W:[-430,0]}[fromDir||'S'];
     CEL.x=tx+d[0]; CEL.y=ty+d[1]; CEL.a=0; CEL.dir=fromDir==='S'?'up':fromDir==='N'?'down':fromDir==='E'?'left':'right';
-    const x0=CEL.x,y0=CEL.y; celTinkle(); setTimeout(()=>{ exclamar(); react('sorprendido',2200,true); },820);
-    await tween(1600,k=>{ const e=easeOut(k); CEL.x=x0+(tx-x0)*e; CEL.y=y0+(ty-y0)*e+Math.sin(k*Math.PI)*10; CEL.a=Math.min(1,k*2.2); });
+    const x0=CEL.x,y0=CEL.y; celTinkle(); setTimeout(()=>{ exclamar(); react('sorprendido',2200,true); },1250);
+    await tween(2700,k=>{ const e=easeOut(k); CEL.x=x0+(tx-x0)*e; CEL.y=y0+(ty-y0)*e+Math.sin(k*Math.PI)*10; CEL.a=Math.min(1,k*2.6); });
     celFace(pos.x,pos.y-30); face='right'; }
+  async function celGoto(tx,ty,ms){ celFace(tx,ty); const x0=CEL.x,y0=CEL.y;
+    await tween(ms||1200,k=>{ const e=easeOut(k); CEL.x=x0+(tx-x0)*e; CEL.y=y0+(ty-y0)*e+Math.sin(k*Math.PI)*7; }); }
   async function celTeleport(){ celTp(); CEL.tp=0; CEL.flash=.35;
     CEL.fx.push({k:'anillo',x:CEL.x,y:CEL.y-CELH*.5-15,t:0,d:.9});
     await tween(1250,k=>{ CEL.tp=k*(TPSEQ.length-0.01); if(k>.72){ CEL.flash=Math.max(CEL.flash,(k-.72)/.28); CEL.a=1-(k-.86)/.14*0+1; } });
@@ -1611,7 +1615,10 @@ MODULES.mapa=(()=>{
   const waitTitle=()=>new Promise(r=>{ const ck=()=>{ const ts=$('#titleScreen'); if(!ts||ts.classList.contains('hidden')) r(); else setTimeout(ck,180); }; ck(); });
   async function celIntro(){ busy=true; route=null; vel={x:0,y:0}; hidePrompt(); face='down';
     await waitTitle(); await wait(650); await celAppear('S');
-    await dlgRun(DLG_INTRO,(L)=>{ if(L.look==='pad'){ const [px,py]=P(...SC.pueblo.pad); celFace(px,py); } else if(L.look==='pablo'){ celFace(pos.x,pos.y-30); } });
+    await dlgRun(DLG_INTRO,(L)=>{ const [px,py]=P(...SC.pueblo.pad);
+      if(L.go==='pad'){ celGoto(px-52,py+30,1400).then(()=>celFace(px,py-60)); }
+      else if(L.go==='pablo'){ celGoto(pos.x+78,pos.y,1400).then(()=>celFace(pos.x,pos.y-30)); }
+      else if(L.look==='pad'){ celFace(px,py-60); } else if(L.look==='pablo'){ celFace(pos.x,pos.y-30); } });
     CEL.dir='down'; await wait(500);            // mira hacia abajo, a Pablo, antes de irse
     await celTeleport(); face='down'; react('decidido',2500);
     const g=G(); g.introSeen=true; saveG(g); busy=false; }
