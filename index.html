@@ -1270,7 +1270,7 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
       cv.width=ov.width=w; cv.height=ov.height=h; ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); if(old)ctx.drawImage(old,0,0); inited=true; };
     fit(); setTimeout(fit,80); window.addEventListener('resize',fit);
     const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]; };
-    ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); timerStart(); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
+    ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); timerStart(); Music.prime('final'); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
       if(tool==='fill'){ floodFill(Math.round(x),Math.round(y)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
     ov.addEventListener('pointermove',e=>{ if(!drawing)return; const [x,y]=pos(e); if(tool==='pencil'||tool==='brush'||tool==='eraser'){ seg(last[0],last[1],x,y); last=[x,y]; } else { octx.clearRect(0,0,ov.width,ov.height); shape(octx,sx,sy,x,y); } });
     const up=e=>{ if(!drawing)return; drawing=false; celStroke(); const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
@@ -1439,18 +1439,26 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   const TRACKS={pueblo:'assets/audio/pueblo.mp3',hielo:'assets/audio/hielo.mp3',fuego:'assets/audio/fuego.mp3',pantano:'assets/audio/pantano.mp3',magia:'assets/audio/magia.mp3',roca:'assets/audio/roca.mp3',desierto:'assets/audio/desierto.mp3',dibujo:'assets/audio/dibujo.mp3',combate:'assets/audio/combate.mp3',accion:'assets/audio/accion.mp3',capturado:'assets/audio/capturado.mp3',entrada:'assets/audio/entrada.mp3',escapa:'assets/audio/escapa.mp3',base:'assets/audio/base.mp3',final:'assets/audio/final.mp3',opening:'assets/audio/opening.mp3'};
   const ONESHOT={capturado:0,entrada:9,escapa:8}; // segundos antes de fundir (0 = entera)
   const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
-  const VOL=.16, TVOL={dibujo:.085}; let aCur=null,aName=null,fades=[]; // −10 dB respecto a antes
+  const VOL=.16, TVOL={dibujo:.085}; const PRIMED={}; let aCur=null,aName=null,fades=[];
+  /* El navegador solo deja arrancar un audio nuevo si viene de un toque reciente. La musica de captura y la del final
+     suenan segundos despues del ultimo toque, asi que se preparan EN el toque y luego solo se reanudan. */
+  function prime(name){ if(muted) return; const tr=ALIAS[name]||name; if(!TRACKS[tr]||PRIMED[tr]) return;
+    try{ const el=new Audio(TRACKS[tr]); el.preload='auto'; el.volume=0; PRIMED[tr]=el;
+      const pr=el.play(); if(pr&&pr.then) pr.then(()=>{ try{ el.pause(); el.currentTime=0; }catch(e){} }).catch(()=>{}); }catch(e){} }
+  function fbJingle(n){ if(n==='escapa') jingle8([392,330,262,196],.15,'sawtooth'); else { fanfare(); setTimeout(()=>jingle8([784,988,1175,1568],.12),700); } } // −10 dB respecto a antes
   function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
   function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__kill=false; fadeTo(old,0,OUT,()=>{ old.pause(); old.src=''; }); }
-    const el=new Audio(TRACKS[name]); const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
+    const el=PRIMED[name]||new Audio(TRACKS[name]); if(PRIMED[name]){ delete PRIMED[name]; try{ el.pause(); el.currentTime=0; }catch(e){} }
+    const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
     const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
     // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
-    el.play().catch(()=>{}); fadeTo(el,TVOL[name]||VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
+    const pr=el.play(); if(pr&&pr.catch) pr.catch(()=>{ if(aCur===el&&(name==='capturado'||name==='final'||name==='escapa')) fbJingle(name); });
+    fadeTo(el,TVOL[name]||VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
   function stopTrack(ms){ if(aCur){ const old=aCur; fadeTo(old,0,ms||700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
   function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia→pueblo)
   function stop(slow){ stopChip(); stopTrack(slow?2600:700); } // slow=true: desvanecimiento suave (p. ej. la Pokédex al empezar la prueba)
-  return {play,stop,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
+  return {play,stop,prime,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
 $('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo') Music.play('dibujo'); else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
 function drawPix(ctx,rows,x,y,px,flip,legs){ const side=rows===SPR.side; rows.forEach((row,j)=>{ let r=row; if(legs&&j>=31){ r=(side?LEGS_SIDE:LEGS)[legs][j-31]||row; } for(let i=0;i<r.length;i++){ const ch=r[i]; if(ch==='.')continue; ctx.fillStyle=PAL[ch]||'#000'; const xi=flip?(r.length-1-i):i; ctx.fillRect(Math.round(x+xi*px),Math.round(y+j*px),Math.ceil(px),Math.ceil(px)); } }); }
 function pixelSprite(src,n,cb){ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=n; c.height=n; const x=c.getContext('2d'); const s=Math.min(im.width,im.height); x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,n,n); cb(c); }; im.onerror=()=>cb(null); im.src=src; }
@@ -1850,7 +1858,7 @@ function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.
   $('#bMonImg').src=pk?('assets/boss/'+pk.id+'_png.png'):'';
   $('#bName').textContent=name; Music.play('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },2700);
   const p=pr0.p;
-    $('#bThrow').onclick=()=>{ btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
+    $('#bThrow').onclick=()=>{ Music.prime('victoria'); Music.prime('escapa'); btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
     const x0=ar.width*.24, y0=ar.height*.22, x1=mr.left-ar.left+mr.width/2-32, y1=ar.height-(mr.top-ar.top+mr.height)-10; const t0=performance.now();
     const fly=now=>{ const t=Math.min(1,(now-t0)/1000); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); txt.textContent='¡'+name+' entra en la bola!'; },300); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); txt.textContent='La bola se cierra…'; },1400); setTimeout(()=>{ setBall('fly'); },1900); setTimeout(()=>wobbles(0),2400); } }; requestAnimationFrame(fly);
     const wobbles=n=>{ if(n>=4){ /* un último silencio de tensión antes de saberlo */ ball.classList.remove('wob'); txt.textContent='…'; blip(180,.5,'sine',.05); setTimeout(decide,1200); return; }
