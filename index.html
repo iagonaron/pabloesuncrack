@@ -167,13 +167,8 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 /* dibujo */
 #dibujo .wrap{flex:1;min-height:0;display:flex;gap:12px}
 #dibujo{background:#0d1b38;padding:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-#dibujo::before{content:'';position:absolute;inset:-8%;background:url(assets/interiors/dibujo.jpg) center/cover;filter:blur(22px) brightness(.5) saturate(.8);z-index:0}
 .dArt{z-index:1}
 .dArt{position:relative;height:100%;width:auto;max-width:100%;max-height:100%;aspect-ratio:3/2;margin:auto;user-select:none}
-.dTimer{position:absolute;left:.5%;top:.8%;z-index:6;background:rgba(17,17,17,.82);color:#fff;border:3px solid #ffcb05;border-radius:12px;padding:.5% 1.1%;font-family:var(--pix);font-size:clamp(10px,1.4vw,19px);letter-spacing:.06em;box-shadow:3px 3px 0 rgba(0,0,0,.45)}
-.dTimer.off{opacity:.5}
-.dTimer.low{background:#b3261e;border-color:#fff;animation:tmrp .9s infinite}
-@keyframes tmrp{50%{transform:scale(1.08)}}
 #artOv .artBox{display:flex;flex-direction:column;align-items:center;gap:2vh}
 .artFrame{position:relative;background:#fff;border:10px solid #ffcb05;border-radius:10px;box-shadow:0 0 0 7px #0b1a5a,0 18px 50px rgba(0,0,0,.6);padding:10px;animation:artin .9s cubic-bezier(.2,1.4,.4,1) both}
 .artFrame img{display:block;max-width:72vw;max-height:58vh;width:auto;height:auto;border-radius:3px}
@@ -877,11 +872,11 @@ function gymWalk(phase,stars,pct){ RESULT_MODE=false; $('#gymWalk').classList.ad
 
 /* ---------------- navegación ---------------- */
 let current='mapa'; const MODULES={};
-function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id!=='mapa') dlgStop(); if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); if(id==='dibujo') Music.play('dibujo');
+function show(id){ { const el=$('#'+id); if(el){ el.classList.remove('fadein'); void el.offsetWidth; el.classList.add('fadein'); } } if(MODULES[current]&&MODULES[current].stop) MODULES[current].stop(); if(PHASES.some(p=>p.id===current)) $('#'+current).innerHTML=''; current=id; if(id!=='mapa') dlgStop(); if(id==='mapa') react('normal',0); else if(id==='dibujo'||id==='admin'||GYMS.includes(id)) reactHide(); 
   $$('.screen').forEach(s=>s.hidden=s.id!==id); const ph=PHASES.find(p=>p.id===id); document.body.classList.toggle('mapmode',id==='mapa'); document.body.classList.toggle('dibmode',id==='dibujo');
   if(ph){ applyTheme(id); $('#hTitle').textContent='Gimnasio '+ph.name; $('#hLbl').src=LBL(id); $('#hLbl').classList.remove('hidden'); $('#hTitle').classList.add('hidden'); $('#hStars').innerHTML=''; }
   else { applyTheme(null); $('#hLbl').classList.add('hidden'); $('#hTitle').classList.remove('hidden'); $('#hTitle').textContent=id==='admin'?'Ajustes':'…'; $('#hStars').innerHTML=''; }
-  gymFrame(GYMS.includes(id)?id:null); document.body.classList.toggle('gymmode',GYMS.includes(id)); if(id!=='mapa'&&id!=='dibujo') Music.stop();
+  gymFrame(GYMS.includes(id)?id:null); document.body.classList.toggle('gymmode',GYMS.includes(id)); if(id!=='mapa') Music.stop();
   if(MODULES[id]&&MODULES[id].start) MODULES[id].start(); }
 /* marco visual de gimnasio: fondo (uno de 12 diseños) + líder arriba, suelo con Pablo abajo */
 const GYM_DESIGNS=['volcan','hielo','cueva','templo','bosque','oceano','electrico','nubes','estadio','espacio','castillo','jardin'];
@@ -1254,9 +1249,8 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
   const TOOLS=[['pencil','✏️'],['brush','🖌️'],['line','📏'],['rect','⬜'],['circle','⚪'],['tri','🔺'],['star','⭐'],['fill','🪣'],['eraser','🧽']];
   function build(){ root.innerHTML=`<div class="dArt" id="dArt"><img src="assets/interiors/dibujo.jpg" alt="" draggable="false">
       <div class="cwrap" id="dWrap"><canvas id="dCv"></canvas><canvas id="dOv"></canvas></div>
-      <div class="dTimer off" id="dTimer">⏳ 5:00</div><button class="dFs" id="dFs" title="Pantalla completa">⛶</button>
+      <button class="dFs" id="dFs" title="Pantalla completa">⛶</button>
       <div class="dSlots" id="dTools" style="left:11.5%"></div><div class="dSlots" id="dTools2" style="left:84.7%"></div>
-      <canvas id="dFx"></canvas><div id="dCelWrap"><div id="dCel"><img id="dCelImg" alt=""></div></div>
       <div class="dFloor"><div class="pal" id="dPal"></div><div class="sizes" id="dSizes"></div><div class="tex" id="dTex"></div><button class="dBig" id="dSave" title="Guardar">💾</button><button class="dBig done" id="dDone" title="Terminado">⭐ ¡Terminado!</button></div></div>`;
     const tl=$('#dTools'), tr=$('#dTools2'); TOOLS.forEach(([id,ic],i)=>{ const b=document.createElement('button'); b.textContent=ic; b.title=id; b.className=id===tool?'on':''; b.onclick=()=>{ tool=id; $$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x===b)); }; (i<6?tl:tr).appendChild(b); });
     [['dUndo','↶','Deshacer'],['dClear','🗑️','Borrar todo'],['dHome','⌂','Volver']].forEach(([id,ic,t])=>{ const b=document.createElement('button'); b.id=id; b.textContent=ic; b.title=t; tr.appendChild(b); });
@@ -1270,15 +1264,18 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     const pal=$('#dPal'); COLORS.forEach(c=>{ const b=document.createElement('button'); b.style.background=c; b.className=c===color?'on':''; b.onclick=()=>{ color=c; $$('#dPal button').forEach(x=>x.classList.toggle('on',x===b)); if(tool==='eraser'){tool='pencil';$$('#dTools button,#dTools2 button').forEach(x=>x.classList.toggle('on',x.title==='pencil'));} }; pal.appendChild(b); });
     const sz=$('#dSizes'); [2,4,10,20].forEach(s=>{ const b=document.createElement('button'); const ds=Math.round(Math.min(26,3+s*1.1)); b.innerHTML=`<i style="width:${ds}px;height:${ds}px"></i>`; b.className=s===size?'on':''; b.onclick=()=>{ size=s; $$('#dSizes button').forEach(x=>x.classList.toggle('on',x===b)); }; sz.appendChild(b); });
     const tx=$('#dTex'); [['solid','Liso'],['dots','Puntos'],['stripes','Rayas'],['check','Cuadros']].forEach(([id,nm])=>{ const b=document.createElement('button'); b.textContent=nm; b.className=id===tex?'on':''; b.onclick=()=>{ tex=id; $$('#dTex button').forEach(x=>x.classList.toggle('on',x===b)); }; tx.appendChild(b); });
-    cv=$('#dCv'); ov=$('#dOv'); ctx=cv.getContext('2d'); octx=ov.getContext('2d');
+    cv=$('#dCv'); ov=$('#dOv');
+    // desynchronized = canvas de baja latencia: el trazo sale pegado al dedo en pantallas tactiles
+    const cOpt={desynchronized:true,willReadFrequently:false};
+    ctx=cv.getContext('2d',Object.assign({alpha:false},cOpt))||cv.getContext('2d'); octx=ov.getContext('2d',cOpt)||ov.getContext('2d');
     const wrap=$('#dWrap'); let inited=false; const fit=()=>{ const w=wrap.clientWidth,h=wrap.clientHeight; if(!w||!h||(cv.width===w&&cv.height===h))return; let old=null; if(inited){ old=document.createElement('canvas'); old.width=cv.width; old.height=cv.height; old.getContext('2d').drawImage(cv,0,0); }
       cv.width=ov.width=w; cv.height=ov.height=h; ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); if(old)ctx.drawImage(old,0,0); inited=true; };
     fit(); setTimeout(fit,80); window.addEventListener('resize',fit);
     const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]; };
-    ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); timerStart(); Music.prime('final'); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
+    ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); Music.prime('final'); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
       if(tool==='fill'){ floodFill(Math.round(x),Math.round(y)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
     ov.addEventListener('pointermove',e=>{ if(!drawing)return; const [x,y]=pos(e); if(tool==='pencil'||tool==='brush'||tool==='eraser'){ seg(last[0],last[1],x,y); last=[x,y]; } else { octx.clearRect(0,0,ov.width,ov.height); shape(octx,sx,sy,x,y); } });
-    const up=e=>{ if(!drawing)return; drawing=false; celStroke(); const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
+    const up=e=>{ if(!drawing)return; drawing=false; const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
     ov.addEventListener('pointerup',up); ov.addEventListener('pointercancel',up);
     $('#dUndo').onclick=()=>{ const im=undo.pop(); if(im)ctx.putImageData(im,0,0); }; $('#dClear').onclick=()=>{ snap(); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); };
     $('#dSave').onclick=()=>{ const a=document.createElement('a'); a.download='dibujo-pablo-'+todayKey()+'.png'; a.href=cv.toDataURL('image/png'); a.click(); };
@@ -1369,15 +1366,15 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
       if(left<=10&&!warned.s10){ warned.s10=1; blip(1200,.2,'square',.08); }
       if(left<=0){ clearInterval(tInt); tInt=null; finale(); } },250); }
   /* presentación de la obra: cuadro + insignia + música del final, y a los 5 s la contraportada */
-  function finale(){ if(tDone) return; tDone=true; tOn=false; clearInterval(tInt); tInt=null; celDibStop();
+  function finale(){ if(tDone) return; tDone=true;
     const g=G(); g.stars=g.stars||{}; setStars('dibujo',3); const g2=G(); g2.newMedal=null; g2.templeShown=true; saveG(g2);
     try{ $('#artImg').src=cv.toDataURL('image/png'); }catch(e){}
     try{ $('#artBadge').innerHTML=badgeSVG('dibujo'); }catch(e){}
     Music.play('final'); $('#artOv').classList.remove('hidden');
     burst(90); setTimeout(()=>burst(70),900); setTimeout(()=>burst(60),1800); setTimeout(()=>burst(50),2700);
     setTimeout(()=>{ $('#artOv').classList.add('hidden'); showEnd(); },5000); }
-  function start(){ undo=[]; build(); timerReset(); setTimeout(celDibStart,300); }
-  return {start,stop(){ celDibStop(); clearInterval(tInt); tInt=null; }};
+  function start(){ undo=[]; tDone=false; build(); }
+  return {start,stop(){}};
 })();
 
 /* ============================================================
@@ -1444,27 +1441,41 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   const TRACKS={pueblo:'assets/audio/pueblo.mp3',hielo:'assets/audio/hielo.mp3',fuego:'assets/audio/fuego.mp3',pantano:'assets/audio/pantano.mp3',magia:'assets/audio/magia.mp3',roca:'assets/audio/roca.mp3',desierto:'assets/audio/desierto.mp3',dibujo:'assets/audio/dibujo.mp3',combate:'assets/audio/combate.mp3',accion:'assets/audio/accion.mp3',capturado:'assets/audio/capturado.mp3',entrada:'assets/audio/entrada.mp3',escapa:'assets/audio/escapa.mp3',base:'assets/audio/base.mp3',final:'assets/audio/final.mp3',opening:'assets/audio/opening.mp3'};
   const ONESHOT={capturado:0,entrada:9,escapa:8}; // segundos antes de fundir (0 = entera)
   const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
-  const VOL=.16, TVOL={dibujo:.085}; const PRIMED={}; let aCur=null,aName=null,fades=[];
+  const VOL=.16, TVOL={dibujo:.085}; const PRIMED={}; const POOL=new Set(); let aCur=null,aName=null,fades=[];
   /* El navegador solo deja arrancar un audio nuevo si viene de un toque reciente. La musica de captura y la del final
      suenan segundos despues del ultimo toque, asi que se preparan EN el toque y luego solo se reanudan. */
   function prime(name){ if(muted) return; const tr=ALIAS[name]||name; if(!TRACKS[tr]||PRIMED[tr]) return;
-    try{ const el=new Audio(TRACKS[tr]); el.preload='auto'; el.volume=0; PRIMED[tr]=el;
-      const pr=el.play(); if(pr&&pr.then) pr.then(()=>{ try{ el.pause(); el.currentTime=0; }catch(e){} }).catch(()=>{}); }catch(e){} }
+    try{ const el=new Audio(TRACKS[tr]); el.preload='auto'; el.volume=0; el.__primed=true; PRIMED[tr]=el; POOL.add(el);
+      const pr=el.play(); if(pr&&pr.then) pr.then(()=>{ if(el.__claimed) return; try{ el.pause(); el.currentTime=0; }catch(e){} }).catch(()=>{}); }catch(e){} }
+  function unprime(){ Object.keys(PRIMED).forEach(k=>{ const el=PRIMED[k]; delete PRIMED[k]; if(el&&el!==aCur) kill(el); }); }
+  function kill(el){ if(!el) return; try{ el.__fade=(el.__fade||0)+1; el.pause(); el.src=''; }catch(e){} POOL.delete(el); }
   function fbJingle(n){ if(n==='escapa') jingle8([392,330,262,196],.15,'sawtooth'); else { fanfare(); setTimeout(()=>jingle8([784,988,1175,1568],.12),700); } } // −10 dB respecto a antes
-  function fadeTo(el,target,ms,then){ const v0=el.volume; const t0=performance.now(); const f=()=>{ const k=Math.min(1,(performance.now()-t0)/ms); el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k)); if(k<1&&!el.__kill) requestAnimationFrame(f); else if(then) then(); }; f(); }
-  function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__kill=false; fadeTo(old,0,OUT,()=>{ old.pause(); old.src=''; }); }
-    const el=PRIMED[name]||new Audio(TRACKS[name]); if(PRIMED[name]){ delete PRIMED[name]; try{ el.pause(); el.currentTime=0; }catch(e){} }
-    const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
+  /* Fundidos por reloj, no por frames: en la pantalla del aula el combate se come los frames y los fundidos
+     se quedaban a medias, asi que la pista vieja no llegaba a pararse nunca y se iban apilando.
+     Ademas cada fundido lleva ficha: si empieza otro sobre la misma pista, el anterior se corta. */
+  function fadeTo(el,target,ms,then){ const tk=(el.__fade=(el.__fade||0)+1); const v0=el.volume; const t0=performance.now();
+    const tick=()=>{ if(el.__fade!==tk){ clearInterval(id); return; }
+      const k=Math.min(1,(performance.now()-t0)/Math.max(1,ms));
+      el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k));
+      if(k>=1){ clearInterval(id); if(then) then(); } };
+    const id=setInterval(tick,40); tick(); }
+  function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__until=performance.now()+OUT+800; fadeTo(old,0,OUT,()=>kill(old)); }
+    const el=PRIMED[name]||new Audio(TRACKS[name]); if(PRIMED[name]){ delete PRIMED[name]; el.__claimed=true; el.__primed=false; try{ el.pause(); el.currentTime=0; }catch(e){} }
+    POOL.add(el); el.__until=0; const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
     const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
     // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
     const pr=el.play(); if(pr&&pr.catch) pr.catch(()=>{ if(aCur===el&&(name==='capturado'||name==='final'||name==='escapa')) fbJingle(name); });
     fadeTo(el,TVOL[name]||VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
-  function stopTrack(ms){ if(aCur){ const old=aCur; fadeTo(old,0,ms||700,()=>{ old.pause(); old.src=''; }); aCur=null; aName=null; } }
+  function stopTrack(ms){ if(aCur){ const old=aCur; old.__until=performance.now()+(ms||700)+800; fadeTo(old,0,ms||700,()=>kill(old)); aCur=null; aName=null; } }
+  /* red de seguridad: nada que no sea la pista actual puede quedarse sonando (el caso de la musica de escape tras el combate) */
+  setInterval(()=>{ POOL.forEach(el=>{ if(el===aCur) return;
+    if(el.paused){ if(!el.__primed) POOL.delete(el); return; }
+    if(!el.__until || performance.now()>el.__until) kill(el); }); },1200);
   function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia→pueblo)
   function stop(slow){ stopChip(); stopTrack(slow?2600:700); } // slow=true: desvanecimiento suave (p. ej. la Pokédex al empezar la prueba)
-  return {play,stop,prime,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
-$('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo') Music.play('dibujo'); else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
+  return {play,stop,prime,unprime,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
+$('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo'){ /* el lienzo va en silencio a proposito */ } else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
 function drawPix(ctx,rows,x,y,px,flip,legs){ const side=rows===SPR.side; rows.forEach((row,j)=>{ let r=row; if(legs&&j>=31){ r=(side?LEGS_SIDE:LEGS)[legs][j-31]||row; } for(let i=0;i<r.length;i++){ const ch=r[i]; if(ch==='.')continue; ctx.fillStyle=PAL[ch]||'#000'; const xi=flip?(r.length-1-i):i; ctx.fillRect(Math.round(x+xi*px),Math.round(y+j*px),Math.ceil(px),Math.ceil(px)); } }); }
 function pixelSprite(src,n,cb){ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=n; c.height=n; const x=c.getContext('2d'); const s=Math.min(im.width,im.height); x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,n,n); cb(c); }; im.onerror=()=>cb(null); im.src=src; }
 function blitPix(target,small,scale){ if(!small){ target.width=target.height=8; return; } target.width=small.width*(scale||8); target.height=small.height*(scale||8); const x=target.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(small,0,0,target.width,target.height); }
@@ -1870,7 +1881,7 @@ function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.
       ball.classList.remove('wob'); void ball.offsetWidth; setBall('wob'); blip(440,.08,'triangle'); txt.textContent='…'+'.'.repeat(n+1); setTimeout(()=>wobbles(n+1),1000); };
     const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70); setTimeout(()=>burst(50),700); setTimeout(()=>burst(40),1400);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
       else { ball.style.display='none'; react(rpick(['derrota','enojado','molesto','llorando','sufriendo']),0,true); setTimeout(()=>react('triste',0),3000); Music.play('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; jingle8([330,262,196],.14,'sawtooth'); }
-      setTimeout(()=>{ if(ov.classList.contains('hidden')) return; btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; },2000); }; }; }
+      setTimeout(()=>{ if(ov.classList.contains('hidden')) return; btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ Music.unprime(); ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; },2000); }; }; }
 /* --- colección --- */
 $('#btnCaught').onclick=()=>{ const c=getCaught(); const grid=$('#collGrid'); grid.innerHTML=c.length?'':'<div class="pf" style="color:#fff;font-size:12px;grid-column:1/-1">Todavía no hay ninguno. ¡A por ellos!</div>';
   c.slice().reverse().forEach(it=>{ const d=document.createElement('div'); d.className='ci'; const cn=document.createElement('img'); cn.src=it.img||''; d.appendChild(cn); const n=document.createElement('div'); n.className='cn'; n.textContent=it.name; d.appendChild(n); grid.appendChild(d); });
