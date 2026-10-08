@@ -986,7 +986,12 @@ function drawSystem(div,bars,opt){ opt=opt||{}; div.innerHTML=''; const S=opt.sc
   return out; }
 
 /* ---------------- generador de frases (Do4–…) ---------------- */
-function genDegrees(n,maxDeg,startDeg){ const out=[startDeg==null?0:startDeg]; while(out.length<n){ const last=out[out.length-1]; let step; const r=Math.random();
+function genDegrees(n,maxDeg,startDeg,noRep){ const out=[startDeg==null?0:startDeg]; while(out.length<n){ const last=out[out.length-1];
+  if(noRep){ /* entonacion: nunca dos notas seguidas iguales (si no, al cantar la primera se dan por buenas las dos) */
+    const cand=[]; [-1,1].forEach(st=>{ const k=last+st; if(k>=0&&k<=maxDeg) cand.push(k,k); });   // grado conjunto con peso doble
+    [-2,2,-3,3].forEach(st=>{ const k=last+st; if(k>=0&&k<=maxDeg) cand.push(k); });
+    out.push(cand.length?pick(cand):last); continue; }
+  let step; const r=Math.random();
   if(r<.62) step=pick([-1,1]); else if(r<.75) step=0; else step=pick([-2,2,-3,3]); let d=last+step; if(d<0||d>maxDeg) d=last-step; if(d<0||d>maxDeg) d=last; out.push(d); } return out; }
 
 /* ============================================================
@@ -1144,7 +1149,7 @@ MODULES.ritmo=(()=>{ const root=$('#ritmo'); let phase=0,timers=[],raf=null,phas
 /* ============================================================
    AUDICIÓN — 4 notas (Do–Sol), la primera dada
    ============================================================ */
-function genRoundNotes(maxDeg,firstDo){ const first=firstDo?0:rnd(0,maxDeg); const d=genDegrees(4,maxDeg,first); // evitar 4 iguales
+function genRoundNotes(maxDeg,firstDo,noRep){ const first=firstDo?0:rnd(0,maxDeg); const d=genDegrees(4,maxDeg,first,noRep); // evitar 4 iguales
   if(new Set(d).size===1){ d[1]=Math.min(maxDeg,d[0]+1); } return d; }
 function noteButtons(container,maxDeg,onPick){ container.innerHTML=''; for(let i=0;i<=maxDeg;i++){ const nm=NOTE_NAMES[i]; const b=document.createElement('button'); b.className='nb'; b.textContent=nm; b.style.background=NOTE_COL[nm]; b.dataset.deg=i; b.onclick=()=>onPick(i,b); container.appendChild(b); } }
 
@@ -1199,7 +1204,7 @@ MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4
     $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
   function playRef(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=Math.min(1.1,CFG.entNoteSec||1); notes.forEach((d,i)=>piano(t0+i*step,DEG_MIDI[d],step*1.1,2.1)); }
   let retry=false;
-  function next(){ if(r>=rounds){ finish(); return; } if(!retry){ notes=genRoundNotes(CFG.entMaxDeg|0,1); } results=[]; render(); $('#entMsg').textContent=retry?'Otra vez: escucha…':'Escucha…'; $('#entCursor').style.display='none'; const go=()=>{ T(playRef,500); const step=Math.min(1.1,CFG.entNoteSec||1); T(sing,500+step*4*1000+600); }; if(!retry&&r===Math.ceil(rounds/2)){ clefWarnCard(go); } else go(); }
+  function next(){ if(r>=rounds){ finish(); return; } if(!retry){ notes=genRoundNotes(CFG.entMaxDeg|0,1,true); } results=[]; render(); $('#entMsg').textContent=retry?'Otra vez: escucha…':'Escucha…'; $('#entCursor').style.display='none'; const go=()=>{ T(playRef,500); const step=Math.min(1.1,CFG.entNoteSec||1); T(sing,500+step*4*1000+600); }; if(!retry&&r===Math.ceil(rounds/2)){ clefWarnCard(go); } else go(); }
   async function sing(){ ac(); try{ await initMic(); }catch(e){ $('#entMsg').textContent='No se pudo abrir el micrófono 😕 (permite el micro en el navegador)'; return; }
     results=notes.map(()=>({best:null,frames:0,voiced:0,sum:0,dirSum:0})); render(); let smooth=0;
     const c=ac(); const bs=CFG.entNoteSec||2.4; // sin cuenta atrás: empieza enseguida
