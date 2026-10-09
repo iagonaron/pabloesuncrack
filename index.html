@@ -226,13 +226,17 @@ main{flex:1;min-height:0;padding:4px 22px 10px;display:flex;flex-direction:colum
 .drop{border:3px dashed rgba(255,255,255,.5);border-radius:18px;padding:22px;text-align:center;font-size:20px;font-weight:800}
 .drop.over{background:rgba(255,255,255,.15)}
 .hidden{display:none!important}
+.audRow{gap:14px;flex-wrap:wrap;justify-content:center}
+.bigbtn:disabled{opacity:.3;pointer-events:none;filter:grayscale(1)}
+#audCheck{background:#1faa59;color:#fff}
 
 /* ===== MAPA 8 BITS ===== */
 :root{--pix:"Press Start 2P","Nunito",monospace}
 .pf{font-family:var(--pix);line-height:1.6}
 body.mapmode header{display:none}body.mapmode main{padding:0}
 body.dibmode header{display:none}body.dibmode main{padding:0;overflow:hidden}
-body.dibmode #react,body.dibmode #dlg{display:none!important}   /* en el lienzo no molesta nada: ni reacciones ni cuadros de texto */
+body.dibmode #react,body.dibmode #dlg{display:none!important}
+body.dibmode,body.dibmode *{cursor:none!important}   /* en el lienzo no se ve el puntero del raton: solo el trazo */   /* en el lienzo no molesta nada: ni reacciones ni cuadros de texto */
 .mapwrap{position:relative;flex:1;min-height:0;background:#1a3d24;overflow:hidden}
 #mapCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
 .hud{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:14px;padding:10px 16px;pointer-events:none}
@@ -728,6 +732,7 @@ function celVoice(){ const c=ac(); if(!c)return; const m=sfxbus()||master(); con
 let DLG_ON=false, DLG_END=null;
 function dlgStop(){ if(DLG_END){ const f=DLG_END; DLG_END=null; f(); } }
 function dlgRun(lines,hook){ return new Promise(res=>{
+  if(current!=='mapa'){ res(); return; }   // si ya se ha salido del mapa (p. ej. directo al lienzo o a una prueba), el dialogo no se abre encima
   const ov=$('#dlg'), tx=$('#dlgTxt'), nm=$('#dlgName'), im=$('#dlgCardImg'), card=$('#dlgCard');
   DLG_ON=true; document.body.classList.add('dlgmode'); ov.classList.remove('hidden');
   try{ card.style.backgroundImage=reactBg(); }catch(e){} // mismo fondo que Pablo: el del sitio donde están
@@ -1154,17 +1159,22 @@ MODULES.audicion=(()=>{ const root=$('#audicion'); let r=0,notes=[],ans=[],cur=1
   function render(){ // se dibuja lo que Pablo ha escrito (ans); al corregir, verde/rojo y la nota correcta si falló
     drawSystem($('#audStaff'),[{notes:notes.map((d,i)=>{ const written=i<cur; const shown=marks?d:(written?ans[i]:d); const ok=marks?marks[i]:null;
       return {deg:shown,dur:'q',hidden:!written&&!marks,color:marks?(ok?'#1faa59':'#d63a4a'):(written?'#16132b':null),text:marks?(ok?NOTE_NAMES[d]:NOTE_NAMES[ans[i]]+'→'+NOTE_NAMES[d]):(written?NOTE_NAMES[ans[i]]:(i===cur?'?':'')),textColor:marks?(ok?'#1faa59':'#d63a4a'):(written?(NOTE_COL[NOTE_NAMES[ans[i]]]||'#16132b'):'#3b6cd6')}; })}],{time:'4/4',height:window.innerHeight<820?170:230,scale:window.innerHeight<820?1.1:1.45,annSize:22,noBeam:true,end:true,clef:altoNow()?'alto':'treble'});
-    $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; }
+    $('#hStars').innerHTML=`Ronda ${r+1}/${rounds}`; syncBtns(); }
+  /* Deshacer: activo si hay alguna nota puesta y aun no se ha corregido. Comprobar: aparece con las 4 notas puestas. */
+  function syncBtns(){ const u=$('#audUndo'), k=$('#audCheck'); if(u) u.disabled=!!(lock||marks||cur===0); if(k) k.classList.toggle('hidden',!(cur>=4&&!marks&&!lock)); }
+  function undoNote(){ if(lock||marks||cur===0) return; cur--; ans.length=cur; blip(330,.06,'triangle',.06); render(); }
   function play(){ ac(); const c=ac(); const t0=c.currentTime+.15; const step=CFG.audNoteSec||.9; notes.forEach((d,i)=>{ piano(t0+i*step,DEG_MIDI[d],step*1.1,2.1); T(()=>{ const el=$('#audStaff'); el.style.boxShadow=`0 0 0 6px var(--acc)`; T(()=>el.style.boxShadow='',step*400); },(t0+i*step-c.currentTime)*1000); }); }
   function next(){ if(r>=rounds){ finish(); return; } lock=false; marks=null; ans=[]; notes=genRoundNotes(CFG.audMaxDeg|0,CFG.audFirstDo); cur=0; render(); if(r===Math.ceil(rounds/2)){ lock=true; clefWarnCard(()=>{ lock=false; T(play,400); }); } else T(play,600); }
-  function onPick(deg,btn){ if(lock||cur>=4)return; ac(); piano(ac().currentTime,DEG_MIDI[deg],.7,1.7); ans[cur]=deg; cur++; render();
-    if(cur>=4){ lock=true; marks=notes.map((d,i)=>ans[i]===d); const bad=marks.filter(m=>!m).length; errs+=bad; T(()=>{ render(); if(bad===0){ sfxOk(); toast(pick(['¡Bien!','¡Crack!','¡Eso es!'])); } else { sfxBad(); toast(bad===1?'1 fallo':bad+' fallos',true); } r++; $('#audBar').style.width=(100*r/rounds)+'%'; T(next,bad?2600:1200); },350); } }
+  function onPick(deg,btn){ if(lock||marks||cur>=4)return; ac(); piano(ac().currentTime,DEG_MIDI[deg],.7,1.7); ans[cur]=deg; cur++; render(); }
+  // ya no se corrige sola al poner la 4.a nota: Pablo puede revisar, deshacer y reescribir; corrige al pulsar Comprobar
+  function check(){ if(lock||marks||cur<4) return;
+    { lock=true; marks=notes.map((d,i)=>ans[i]===d); syncBtns(); const bad=marks.filter(m=>!m).length; errs+=bad; T(()=>{ render(); if(bad===0){ sfxOk(); toast(pick(['¡Bien!','¡Crack!','¡Eso es!'])); } else { sfxBad(); toast(bad===1?'1 fallo':bad+' fallos',true); } r++; $('#audBar').style.width=(100*r/rounds)+'%'; T(next,bad?2600:1200); },350); } }
   function finish(){ const total=rounds*4; const pct=Math.round(100*Math.max(0,total-errs)/total); const stars=pctStars(pct); setStars('audicion',stars,pct); fanfare(); burst(50);
     gymResult(root,'audicion',stars,`${rounds} rondas · ${errs?errs+' fallos':'sin fallos'} · ${pct}%`,start,pct); }
   function start(){ clear(); r=0; errs=0; rounds=CFG.audRounds|0||6;
-    root.innerHTML=`<div class="barwrap"><div class="bar" id="audBar"></div></div><div class="hint">Escucha las 4 notas y escríbelas en orden. Si quieres oírlas otra vez, pulsa Escuchar</div>
-      <div class="paper" style="margin:8px auto;width:min(92%,760px)"><div id="audStaff"></div></div><div class="row"><button class="bigbtn" id="audPlay">🔊 Escuchar</button></div><div class="fill"></div><div class="notebtns" id="audBtns"></div>`;
-    $('#audPlay').onclick=()=>{ if(!marks) play(); }; noteButtons($('#audBtns'),CFG.audMaxDeg|0,onPick); T(next,50); }
+    root.innerHTML=`<div class="barwrap"><div class="bar" id="audBar"></div></div><div class="hint">Escucha las 4 notas y escríbelas en orden. ¿Te equivocas? Deshacer. ¿Ya están? Comprobar</div>
+      <div class="paper" style="margin:8px auto;width:min(92%,760px)"><div id="audStaff"></div></div><div class="row audRow"><button class="bigbtn" id="audPlay">🔊 Escuchar</button><button class="bigbtn" id="audUndo" disabled>↶ Deshacer</button><button class="bigbtn hidden" id="audCheck">✔ Comprobar</button></div><div class="fill"></div><div class="notebtns" id="audBtns"></div>`;
+    $('#audPlay').onclick=()=>{ if(!marks) play(); }; $('#audUndo').onclick=undoNote; $('#audCheck').onclick=check; noteButtons($('#audBtns'),CFG.audMaxDeg|0,onPick); T(next,50); }
   return {start,stop:clear};
 })();
 
@@ -1244,7 +1254,7 @@ MODULES.entonacion=(()=>{ const root=$('#entonacion'); let r=0,notes=[],rounds=4
 /* ============================================================
    DIBUJO — paint libre
    ============================================================ */
-MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',color='#000000',size=4,tex='solid',drawing=false,sx=0,sy=0,last=null,undo=[];
+MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,DPR=1,tool='pencil',color='#000000',size=2,tex='solid',drawing=false,sx=0,sy=0,last=null,undo=[];
   const COLORS=['#000000','#ffffff','#9e9e9e','#e53935','#fb8c00','#f4c400','#43a047','#1e88e5','#8e24aa','#ec407a','#8d6e63','#00bcd4','#c6ff00','#ff7043','#3949ab','#ffd7b5'];
   const TOOLS=[['pencil','✏️'],['brush','🖌️'],['line','📏'],['rect','⬜'],['circle','⚪'],['tri','🔺'],['star','⭐'],['fill','🪣'],['eraser','🧽']];
   function build(){ root.innerHTML=`<div class="dArt" id="dArt"><img src="assets/interiors/dibujo.jpg" alt="" draggable="false">
@@ -1268,16 +1278,22 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     // desynchronized = canvas de baja latencia: el trazo sale pegado al dedo en pantallas tactiles
     const cOpt={desynchronized:true,willReadFrequently:false};
     ctx=cv.getContext('2d',Object.assign({alpha:false},cOpt))||cv.getContext('2d'); octx=ov.getContext('2d',cOpt)||ov.getContext('2d');
-    const wrap=$('#dWrap'); let inited=false; const fit=()=>{ const w=wrap.clientWidth,h=wrap.clientHeight; if(!w||!h||(cv.width===w&&cv.height===h))return; let old=null; if(inited){ old=document.createElement('canvas'); old.width=cv.width; old.height=cv.height; old.getContext('2d').drawImage(cv,0,0); }
-      cv.width=ov.width=w; cv.height=ov.height=h; ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); if(old)ctx.drawImage(old,0,0); inited=true; };
+    /* Trazo nitido: el lienzo se dibuja por dentro al DOBLE de resolucion como minimo (y a la de la pantalla si es mayor)
+       y el navegador lo reduce con suavizado. Antes iba a 1 punto por pixel y el borde de la linea se veia en escalera. */
+    const wrap=$('#dWrap'); let inited=false; const fit=()=>{ const w=wrap.clientWidth,h=wrap.clientHeight; const d=Math.min(2.5,Math.max(2,window.devicePixelRatio||1));
+      const W=Math.round(w*d),H=Math.round(h*d); if(!w||!h||(cv.width===W&&cv.height===H))return;
+      let old=null; if(inited){ old=document.createElement('canvas'); old.width=cv.width; old.height=cv.height; old.getContext('2d').drawImage(cv,0,0); }
+      cv.width=ov.width=W; cv.height=ov.height=H; DPR=d;
+      ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); if(old) ctx.drawImage(old,0,0,W,H);
+      ctx.setTransform(d,0,0,d,0,0); octx.setTransform(d,0,0,d,0,0); ctx.imageSmoothingQuality='high'; inited=true; };
     fit(); setTimeout(fit,80); window.addEventListener('resize',fit);
-    const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]; };
+    const pos=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*(cv.width/DPR)/r.width,(e.clientY-r.top)*(cv.height/DPR)/r.height]; };  // en px CSS (la escala la pone el contexto)
     ov.addEventListener('pointerdown',e=>{ if(tDone) return; e.preventDefault(); ov.setPointerCapture(e.pointerId); Music.prime('final'); const [x,y]=pos(e); snap(); drawing=true; sx=x; sy=y; last=[x,y];
-      if(tool==='fill'){ floodFill(Math.round(x),Math.round(y)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
+      if(tool==='fill'){ floodFill(Math.round(x*DPR),Math.round(y*DPR)); drawing=false; return; } if(tool==='pencil'||tool==='brush'||tool==='eraser') dot(x,y); });
     ov.addEventListener('pointermove',e=>{ if(!drawing)return; const [x,y]=pos(e); if(tool==='pencil'||tool==='brush'||tool==='eraser'){ seg(last[0],last[1],x,y); last=[x,y]; } else { octx.clearRect(0,0,ov.width,ov.height); shape(octx,sx,sy,x,y); } });
     const up=e=>{ if(!drawing)return; drawing=false; const [x,y]=pos(e); octx.clearRect(0,0,ov.width,ov.height); if(!(tool==='pencil'||tool==='brush'||tool==='eraser'||tool==='fill')) shape(ctx,sx,sy,x,y); };
     ov.addEventListener('pointerup',up); ov.addEventListener('pointercancel',up);
-    $('#dUndo').onclick=()=>{ const im=undo.pop(); if(im)ctx.putImageData(im,0,0); }; $('#dClear').onclick=()=>{ snap(); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); };
+    $('#dUndo').onclick=()=>{ const im=undo.pop(); if(!im) return; ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(im,0,0); ctx.restore(); }; $('#dClear').onclick=()=>{ snap(); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height); };
     $('#dSave').onclick=()=>{ const a=document.createElement('a'); a.download='dibujo-pablo-'+todayKey()+'.png'; a.href=cv.toDataURL('image/png'); a.click(); };
     $('#dDone').onclick=()=>finale(); }
   /* ---- Celesti acompañante: mira el lienzo, reacciona y cambia de sitio cada 30 s ---- */
@@ -1332,7 +1348,7 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
         c.restore(); });
       cFxRaf=requestAnimationFrame(loop); };
     if(cFxRaf) cancelAnimationFrame(cFxRaf); cFxRaf=requestAnimationFrame(loop); }
-  function snap(){ undo.push(ctx.getImageData(0,0,cv.width,cv.height)); if(undo.length>25)undo.shift(); }
+  function snap(){ const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; c.getContext('2d').drawImage(cv,0,0); undo.push(c); if(undo.length>12)undo.shift(); }
   function pattern(c){ if(tex==='solid')return color; const p=document.createElement('canvas'); p.width=p.height=16; const pc=p.getContext('2d'); pc.fillStyle=color;
     if(tex==='dots'){ pc.beginPath(); pc.arc(4,4,3,0,7); pc.arc(12,12,3,0,7); pc.fill(); } else if(tex==='stripes'){ pc.fillRect(0,0,16,5); pc.fillRect(0,10,16,3); } else { pc.fillRect(0,0,8,8); pc.fillRect(8,8,8,8); }
     return c.createPattern(p,'repeat'); }
@@ -1353,7 +1369,7 @@ MODULES.dibujo=(()=>{ const root=$('#dibujo'); let cv,ctx,ov,octx,tool='pencil',
     // máscara → canvas; luego color/textura recortado por la máscara
     const mk=document.createElement('canvas'); mk.width=W; mk.height=H; const mc=mk.getContext('2d'); const mi=mc.createImageData(W,H); for(let i=0;i<W*H;i++){ if(mask[i]){ mi.data[i*4+3]=255; } } mc.putImageData(mi,0,0);
     const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H; const tc=tmp.getContext('2d'); tc.fillStyle=tex==='solid'?color:pattern(tc); tc.fillRect(0,0,W,H); tc.globalCompositeOperation='destination-in'; tc.drawImage(mk,0,0);
-    ctx.drawImage(tmp,0,0); }
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(tmp,0,0); ctx.restore(); }  // la mascara va en pixeles reales: sin escala
   function hex2rgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
   /* ---- 5 minutos de dibujo: la cuenta atrás arranca con el primer trazo ---- */
   const DUR=300; let tInt=null, tEnd=0, tOn=false, tDone=false, warned={};
@@ -1442,40 +1458,57 @@ const Music=(()=>{ let cur=null,timer=null,gain=null,nextT=0,step=0; const N=m=>
   const ONESHOT={capturado:0,entrada:9,escapa:8}; // segundos antes de fundir (0 = entera)
   const ALIAS={paseo:'pueblo',tension:'accion',epico:'entrada',accion:'accion',combate:'combate',victoria:'capturado',pueblo:'pueblo',hielo:'hielo',fuego:'fuego',pantano:'pantano',magia:'magia',roca:'roca',desierto:'desierto',dibujo:'dibujo',capturado:'capturado',entrada:'entrada',escapa:'escapa',base:'base',final:'final',opening:'opening'};
   const VOL=.16, TVOL={dibujo:.085}; const PRIMED={}; const POOL=new Set(); let aCur=null,aName=null,fades=[];
-  /* El navegador solo deja arrancar un audio nuevo si viene de un toque reciente. La musica de captura y la del final
-     suenan segundos despues del ultimo toque, asi que se preparan EN el toque y luego solo se reanudan. */
-  function prime(name){ if(muted) return; const tr=ALIAS[name]||name; if(!TRACKS[tr]||PRIMED[tr]) return;
-    try{ const el=new Audio(TRACKS[tr]); el.preload='auto'; el.volume=0; el.__primed=true; PRIMED[tr]=el; POOL.add(el);
+  /* En iPad/iPhone el volumen de un <audio> NO se puede tocar desde la web: siempre suena al 100 %.
+     Alli un "fundido" no existe y dos pistas que se cruzan suenan las dos a tope (el caos del combate).
+     Lo detectamos y, en ese caso, cada cambio de pista es un corte limpio: nunca suenan dos. */
+  const IOS=/iP(ad|hone|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const VOL_OK=!IOS&&(()=>{ try{ const a=new Audio(); a.volume=.5; return Math.abs(a.volume-.5)<.01; }catch(e){ return false; } })();
+  /* La musica de captura y la del final se preparan EN el toque (silenciadas) y luego solo se reanudan,
+     por si el navegador exige un toque reciente para arrancar audio. Al prepararlas van en silencio (muted),
+     que si funciona en iPad, no con volumen 0 como antes. */
+  function prime(name){ if(muted) return; const tr=ALIAS[name]||name; if(!TRACKS[tr]) return; const ex=PRIMED[tr]; if(ex&&ex.src&&!ex.error) return;
+    try{ const el=new Audio(TRACKS[tr]); el.preload='auto'; el.muted=true; el.__primed=true; PRIMED[tr]=el; POOL.add(el);
       const pr=el.play(); if(pr&&pr.then) pr.then(()=>{ if(el.__claimed) return; try{ el.pause(); el.currentTime=0; }catch(e){} }).catch(()=>{}); }catch(e){} }
   function unprime(){ Object.keys(PRIMED).forEach(k=>{ const el=PRIMED[k]; delete PRIMED[k]; if(el&&el!==aCur) kill(el); }); }
   function kill(el){ if(!el) return; try{ el.__fade=(el.__fade||0)+1; el.pause(); el.src=''; }catch(e){} POOL.delete(el); }
-  function fbJingle(n){ if(n==='escapa') jingle8([392,330,262,196],.15,'sawtooth'); else { fanfare(); setTimeout(()=>jingle8([784,988,1175,1568],.12),700); } } // −10 dB respecto a antes
-  /* Fundidos por reloj, no por frames: en la pantalla del aula el combate se come los frames y los fundidos
-     se quedaban a medias, asi que la pista vieja no llegaba a pararse nunca y se iban apilando.
-     Ademas cada fundido lleva ficha: si empieza otro sobre la misma pista, el anterior se corta. */
+  function fbJingle(n){ if(n==='escapa') jingle8([392,330,262,196],.15,'sawtooth'); else { fanfare(); setTimeout(()=>jingle8([784,988,1175,1568],.12),700); } }
+  /* Fundidos por reloj (no por frames) y con ficha: si empieza otro sobre la misma pista, el anterior se corta. */
   function fadeTo(el,target,ms,then){ const tk=(el.__fade=(el.__fade||0)+1); const v0=el.volume; const t0=performance.now();
     const tick=()=>{ if(el.__fade!==tk){ clearInterval(id); return; }
       const k=Math.min(1,(performance.now()-t0)/Math.max(1,ms));
       el.volume=Math.max(0,Math.min(1,v0+(target-v0)*k));
       if(k>=1){ clearInterval(id); if(then) then(); } };
     const id=setInterval(tick,40); tick(); }
-  function playTrack(name,slow){ if(aName===name&&aCur){ if(aCur.paused&&!aCur.__kill) aCur.play().catch(()=>{}); return; } const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500; if(old){ old.__until=performance.now()+OUT+800; fadeTo(old,0,OUT,()=>kill(old)); }
-    const el=PRIMED[name]||new Audio(TRACKS[name]); if(PRIMED[name]){ delete PRIMED[name]; el.__claimed=true; el.__primed=false; try{ el.pause(); el.currentTime=0; }catch(e){} }
-    POOL.add(el); el.__until=0; const one=ONESHOT[name]!==undefined; el.loop=!one; el.volume=0; el.preload='auto'; aCur=el; aName=name;
+  /* REGLA DE ORO: suena la pista actual y, como mucho, la anterior saliendo en fundido (solo donde el fundido existe).
+     Todo lo demas se corta en el acto. hard=true -> corte seco (momentos del combate). */
+  function playTrack(name,slow,hard){
+    if(aName===name&&aCur&&aCur.src&&!aCur.error){ if(aCur.paused) aCur.play().catch(()=>{}); return; }
+    const old=aCur; const OUT=slow?2800:1200, IN=slow?2800:1500;
+    POOL.forEach(el=>{ if(el!==old&&!el.__primed) kill(el); });
+    if(old){ if(VOL_OK&&!hard){ old.__until=performance.now()+OUT+600; fadeTo(old,0,OUT,()=>kill(old)); } else kill(old); }
+    let el=PRIMED[name]; if(el){ delete PRIMED[name]; if(el.error||!el.src){ kill(el); el=null; } else { el.__claimed=true; el.__primed=false; try{ el.pause(); el.currentTime=0; }catch(e){} } }
+    if(!el) el=new Audio(TRACKS[name]);
+    POOL.add(el); el.__until=0; el.muted=false; const one=ONESHOT[name]!==undefined; el.loop=!one; el.preload='auto'; aCur=el; aName=name;
+    const target=TVOL[name]||VOL; el.volume=VOL_OK?0:target;
     const seek=()=>{ try{ if(name==='opening'){ el.currentTime=5; } else if(!one&&name!=='final'&&name!=='base'&&el.duration&&isFinite(el.duration)) el.currentTime=el.duration*(.05+Math.random()*.7); }catch(e){} };
-    // play() se llama de forma síncrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
+    // play() se llama de forma sincrona dentro del gesto del usuario (Safari lo exige); el salto a un punto aleatorio se hace cuando haya metadatos
     const pr=el.play(); if(pr&&pr.catch) pr.catch(()=>{ if(aCur===el&&(name==='capturado'||name==='final'||name==='escapa')) fbJingle(name); });
-    fadeTo(el,TVOL[name]||VOL,one?300:IN); if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ fadeTo(el,0,1500,()=>{ el.pause(); }); } },ONESHOT[name]*1000);
+    if(VOL_OK) fadeTo(el,target,hard?200:(one?300:IN));
+    if(one&&ONESHOT[name]>0) setTimeout(()=>{ if(aCur===el){ if(VOL_OK) fadeTo(el,0,1500,()=>{ el.pause(); }); else el.pause(); } },ONESHOT[name]*1000);
     if(el.readyState>=1) seek(); else el.addEventListener('loadedmetadata',seek,{once:true}); }
-  function stopTrack(ms){ if(aCur){ const old=aCur; old.__until=performance.now()+(ms||700)+800; fadeTo(old,0,ms||700,()=>kill(old)); aCur=null; aName=null; } }
-  /* red de seguridad: nada que no sea la pista actual puede quedarse sonando (el caso de la musica de escape tras el combate) */
-  setInterval(()=>{ POOL.forEach(el=>{ if(el===aCur) return;
-    if(el.paused){ if(!el.__primed) POOL.delete(el); return; }
-    if(!el.__until || performance.now()>el.__until) kill(el); }); },1200);
-  function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia→pueblo)
-  function stop(slow){ stopChip(); stopTrack(slow?2600:700); } // slow=true: desvanecimiento suave (p. ej. la Pokédex al empezar la prueba)
-  return {play,stop,prime,unprime,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;}}; })();
-$('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo'){ /* el lienzo va en silencio a proposito */ } else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
+  function stopTrack(ms){ POOL.forEach(el=>{ if(el!==aCur&&!el.__primed) kill(el); });
+    if(aCur){ const old=aCur; if(VOL_OK){ old.__until=performance.now()+(ms||700)+600; fadeTo(old,0,ms||700,()=>kill(old)); } else kill(old); aCur=null; aName=null; } }
+  /* red de seguridad: cada 0,7 s, todo lo que no sea la pista actual y ya haya agotado su fundido, se calla.
+     Las pistas preparadas (silenciadas) no se tocan: antes esta misma red las mataba a medio cargar y luego
+     la musica de captura no sonaba. */
+  setInterval(()=>{ POOL.forEach(el=>{ if(el===aCur||el.__primed) return;
+    if(el.paused){ POOL.delete(el); return; }
+    if(!el.__until||performance.now()>el.__until) kill(el); }); },700);
+  function play(name,slow){ if(muted)return; const tr=ALIAS[name]; if(tr){ stopChip(); playTrack(tr,!!slow); return; } stopTrack(); playChip(name); } // slow=true: fundido largo (cambios de bioma, insignia->pueblo)
+  function cut(name){ if(muted)return; const tr=ALIAS[name]||name; stopChip(); if(TRACKS[tr]) playTrack(tr,false,true); } // corte seco: combate, captura, escape
+  function stop(slow){ stopChip(); stopTrack(slow?2600:700); } // slow=true: desvanecimiento suave (p. ej. la Pokedex al empezar la prueba)
+  return {play,cut,stop,prime,unprime,setMute,get muted(){return muted;},get current(){return aName||cur;},el(){return aCur;},get volumeControl(){return VOL_OK;}}; })();
+$('#btnMute').onclick=()=>{ Music.setMute(!Music.muted); if(!Music.muted){ if(!$('#battle').classList.contains('hidden')){ /* en combate no se arranca nada: no pisar la secuencia */ } else if(!$('#titleScreen').classList.contains('hidden')) Music.play('opening'); else if(current==='mapa'&&MODULES.mapa&&MODULES.mapa.musicFor) MODULES.mapa.musicFor(); else if(current==='dibujo'){ /* el lienzo va en silencio a proposito */ } else Music.play('accion'); } }; if(Music.muted) $('#btnMute').classList.add('off');
 function drawPix(ctx,rows,x,y,px,flip,legs){ const side=rows===SPR.side; rows.forEach((row,j)=>{ let r=row; if(legs&&j>=31){ r=(side?LEGS_SIDE:LEGS)[legs][j-31]||row; } for(let i=0;i<r.length;i++){ const ch=r[i]; if(ch==='.')continue; ctx.fillStyle=PAL[ch]||'#000'; const xi=flip?(r.length-1-i):i; ctx.fillRect(Math.round(x+xi*px),Math.round(y+j*px),Math.ceil(px),Math.ceil(px)); } }); }
 function pixelSprite(src,n,cb){ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=n; c.height=n; const x=c.getContext('2d'); const s=Math.min(im.width,im.height); x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,n,n); cb(c); }; im.onerror=()=>cb(null); im.src=src; }
 function blitPix(target,small,scale){ if(!small){ target.width=target.height=8; return; } target.width=small.width*(scale||8); target.height=small.height*(scale||8); const x=target.getContext('2d'); x.imageSmoothingEnabled=false; x.drawImage(small,0,0,target.width,target.height); }
@@ -1869,19 +1902,21 @@ function roar(){ const c=ac(); if(!c)return; const t=c.currentTime; const m=sfxb
   const vib=c.createOscillator(),vg=c.createGain(); vib.frequency.value=28; vg.gain.value=180; vib.connect(vg); vib.start(t); vib.stop(t+1.1);
   const len=Math.floor(c.sampleRate*.9); const b=c.createBuffer(1,len,c.sampleRate); const d=b.getChannelData(0); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.5); const s=c.createBufferSource(); s.buffer=b; const f2=c.createBiquadFilter(); f2.type='highpass'; f2.frequency.value=2500; const g2=c.createGain(); g2.gain.setValueAtTime(.14,t); g2.gain.exponentialRampToValueAtTime(.0001,t+.9); s.connect(f2); f2.connect(g2); g2.connect(m); s.start(t);
   const sub=c.createOscillator(),sg=c.createGain(); sub.type='square'; sub.frequency.setValueAtTime(70,t); sub.frequency.exponentialRampToValueAtTime(40,t+.8); sg.gain.setValueAtTime(.12,t); sg.gain.exponentialRampToValueAtTime(.0001,t+.8); sub.connect(sg); sg.connect(m); sub.start(t); sub.stop(t+.85); }
-function startBattle(phase,stars,pct){ const pk=TODAY[phase]; const name=(pk?pk.name:'Legendario').toUpperCase(); const ov=$('#battle'); ov.classList.remove('hidden'); window.__battleBiome=pk?pk.biome:'pueblo'; $('#react').classList.add('inbattle'); react('serio',0); const mon=$('#bMon'), ball=$('#bBall'), txt=$('#bTxt'), btns=$('#bBtns'); mon.className='bmon'; ball.style.display='none'; ball.className='ball'; const BALLIMG={fly:'frontal',open:'abierta',luz:'luz',wob:'temblando',got:'completada',fx:'efecto',close:'cerrandose'}; const setBall=(cls)=>{ ball.className='ball '+cls; $('#bBallImg').src='assets/ball/'+(BALLIMG[cls]||'frontal')+'.png'; };
-  applyTheme(phase); drawArena($('#arenaBg'),gymDesignFor(phase)); setTimeout(()=>{ if(ov.classList.contains('hidden'))return; roar(); mon.classList.add('shake'); document.body.classList.add('quake'); setTimeout(()=>{ mon.classList.remove('shake'); document.body.classList.remove('quake'); },700); },1150); 
+function startBattle(phase,stars,pct){ const ov=$('#battle'); if(!ov.classList.contains('hidden')) return; /* ya hay un combate en marcha: no se abre otro encima */
+  const BID=(window.__BID=(window.__BID||0)+1); const alive=()=>window.__BID===BID&&!ov.classList.contains('hidden'); let thrown=false, decided=false, left=false;
+  const pk=TODAY[phase]; const name=(pk?pk.name:'Legendario').toUpperCase(); ov.classList.remove('hidden'); window.__battleBiome=pk?pk.biome:'pueblo'; $('#react').classList.add('inbattle'); react('serio',0); const mon=$('#bMon'), ball=$('#bBall'), txt=$('#bTxt'), btns=$('#bBtns'); mon.className='bmon'; ball.style.display='none'; ball.className='ball'; const BALLIMG={fly:'frontal',open:'abierta',luz:'luz',wob:'temblando',got:'completada',fx:'efecto',close:'cerrandose'}; const setBall=(cls)=>{ ball.className='ball '+cls; $('#bBallImg').src='assets/ball/'+(BALLIMG[cls]||'frontal')+'.png'; };
+  applyTheme(phase); drawArena($('#arenaBg'),gymDesignFor(phase)); setTimeout(()=>{ if(!alive())return; roar(); mon.classList.add('shake'); document.body.classList.add('quake'); setTimeout(()=>{ mon.classList.remove('shake'); document.body.classList.remove('quake'); },700); },1150); 
   $('#bMonImg').src=pk?('assets/boss/'+pk.id+'_png.png'):'';
-  $('#bName').textContent=name; Music.play('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },2700);
+  $('#bName').textContent=name; Music.cut('combate'); const pr0=probOf(pct,stars); txt.textContent='¡'+name+', líder del gimnasio, te espera! Posibilidades: '+pr0.pct+'% ('+pr0.t+')'; btns.innerHTML='<button class="pixbtn big hidden" id="bThrow">¡CAPTÚRALO!</button>'; setTimeout(()=>{ if(!alive())return; const b=$('#bThrow'); if(b) b.classList.remove('hidden'); },2700);
   const p=pr0.p;
-    $('#bThrow').onclick=()=>{ Music.prime('victoria'); Music.prime('escapa'); btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
+    $('#bThrow').onclick=()=>{ if(thrown||!alive()) return; thrown=true; /* un solo lanzamiento aunque se pulse veinte veces */ Music.prime('victoria'); Music.prime('escapa'); btns.innerHTML=''; txt.textContent='¡Pablo lanza la bola!'; blip(600,.1); react('entusiasmado',1600,true); const bp=$('#bPablo'); if(bp){ bp.src='assets/react/lanza_png.png'; bp.classList.add('throwing'); setTimeout(()=>{ bp.src='assets/react/combate_png.png'; bp.classList.remove('throwing'); },900); } ball.style.display='block'; setBall('fly'); const ar=$('.arena').getBoundingClientRect(); const mr=mon.getBoundingClientRect();
     const x0=ar.width*.24, y0=ar.height*.22, x1=mr.left-ar.left+mr.width/2-32, y1=ar.height-(mr.top-ar.top+mr.height)-10; const t0=performance.now();
-    const fly=now=>{ const t=Math.min(1,(now-t0)/1000); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); txt.textContent='¡'+name+' entra en la bola!'; },300); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); txt.textContent='La bola se cierra…'; },1400); setTimeout(()=>{ setBall('fly'); },1900); setTimeout(()=>wobbles(0),2400); } }; requestAnimationFrame(fly);
-    const wobbles=n=>{ if(n>=4){ /* un último silencio de tensión antes de saberlo */ ball.classList.remove('wob'); txt.textContent='…'; blip(180,.5,'sine',.05); setTimeout(decide,1200); return; }
+    const fly=now=>{ if(!alive()) return; const t=Math.min(1,(now-t0)/1000); const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t+Math.sin(t*Math.PI)*ar.height*.35; ball.style.left=x+'px'; ball.style.bottom=y+'px'; ball.style.transform=`rotate(${t*720}deg)`; if(t<1) requestAnimationFrame(fly); else { setBall('open'); blip(1000,.15); ball.style.transform=''; setTimeout(()=>{ mon.classList.add('gone'); setBall('luz'); blip(1400,.25,'sine'); txt.textContent='¡'+name+' entra en la bola!'; },300); setTimeout(()=>{ setBall('close'); blip(500,.1); react('nervioso',0); txt.textContent='La bola se cierra…'; },1400); setTimeout(()=>{ setBall('fly'); },1900); setTimeout(()=>wobbles(0),2400); } }; requestAnimationFrame(fly);
+    const wobbles=n=>{ if(!alive()) return; if(n>=4){ /* un último silencio de tensión antes de saberlo */ ball.classList.remove('wob'); txt.textContent='…'; blip(180,.5,'sine',.05); setTimeout(decide,1200); return; }
       ball.classList.remove('wob'); void ball.offsetWidth; setBall('wob'); blip(440,.08,'triangle'); txt.textContent='…'+'.'.repeat(n+1); setTimeout(()=>wobbles(n+1),1000); };
-    const decide=()=>{ Music.stop(); if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.play('victoria'); burst(70); setTimeout(()=>burst(50),700); setTimeout(()=>burst(40),1400);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
-      else { ball.style.display='none'; react(rpick(['derrota','enojado','molesto','llorando','sufriendo']),0,true); setTimeout(()=>react('triste',0),3000); Music.play('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; jingle8([330,262,196],.14,'sawtooth'); }
-      setTimeout(()=>{ if(ov.classList.contains('hidden')) return; btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ Music.unprime(); ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; },2000); }; }; }
+    const decide=()=>{ if(decided||!alive()) return; decided=true; /* se decide UNA vez: nunca victoria y derrota a la vez */ if(Math.random()<p){ setBall('got'); react('victoria',0,true); setTimeout(()=>react('rie',0,true),2600); txt.textContent='¡'+name+' ha sido capturado!'; Music.cut('victoria'); burst(70); setTimeout(()=>burst(50),700); setTimeout(()=>burst(40),1400);  const c=getCaught(); c.push({id:pk?pk.id:'?',name:pk?pk.name:'Legendario',img:pk?pk.img:'',date:todayKey()}); saveJSON('pec_caught',c); }
+      else { ball.style.display='none'; react(rpick(['derrota','enojado','molesto','llorando','sufriendo']),0,true); setTimeout(()=>react('triste',0),3000); Music.cut('escapa'); mon.classList.remove('gone'); mon.classList.add('shake'); txt.textContent='¡Oh no! '+name+' se ha escapado…'; }
+      setTimeout(()=>{ if(!alive()) return; btns.innerHTML='<button class="pixbtn" id="bGo">SEGUIR</button>'; $('#bGo').onclick=()=>{ if(left) return; left=true; Music.unprime(); ov.classList.add('hidden'); $('#react').classList.remove('inbattle'); const g=G(); if(!g.encountered.includes(phase))g.encountered.push(phase); g.pending=null; saveG(g); show('mapa'); }; },2000); }; }; }
 /* --- colección --- */
 $('#btnCaught').onclick=()=>{ const c=getCaught(); const grid=$('#collGrid'); grid.innerHTML=c.length?'':'<div class="pf" style="color:#fff;font-size:12px;grid-column:1/-1">Todavía no hay ninguno. ¡A por ellos!</div>';
   c.slice().reverse().forEach(it=>{ const d=document.createElement('div'); d.className='ci'; const cn=document.createElement('img'); cn.src=it.img||''; d.appendChild(cn); const n=document.createElement('div'); n.className='cn'; n.textContent=it.name; d.appendChild(n); grid.appendChild(d); });
